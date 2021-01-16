@@ -13,6 +13,9 @@ client.on('message', msg =>{
 	if(msg.content == 'ping'){
 		msg.reply('pong');
 	}
+	else if(msg.content == 'marco' || msg.content == 'Marco'){
+		msg.reply('Polooo');
+	}
 });
 
 client.login(process.env.TOKEN);

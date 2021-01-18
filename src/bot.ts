@@ -40,16 +40,26 @@ client.on('ready', () => {
 
 client.on('message', msg =>{
 	let message: string = msg.content;
-	if(message == 'ping'){
-		msg.reply('pong');
-	}
-	else if(message == 'marco' || message == 'Marco'){
-		msg.reply('Polooo');
-	}
-	else if(message == 'getbook'){
-		let isbn: string = "9780140328721";
-		getBookInfo(isbn,msg);
-	}
+	let channelID:any = msg.channel.id;
+
+	let command:string = message.split(' ')[0];
+	let args:string[] = message.split(' ');
+	switch(command){
+		case 'ping':
+			msg.reply('pong');
+			break;
+		case 'getbook':
+			if(args.length == 1 ){
+				if(args[1].length == 10 || args[1].length == 13){
+					//let isbn: string = "9780140328721";
+					let isbn:string = args[1];
+					getBookInfo(isbn,msg);
+				}
+			}else{
+				msg.reply("Pasa un isbn porfavor :upside_down_face:");
+			}
+			break;
+	};
 });
 
 client.login(process.env.TOKEN);

@@ -78,15 +78,26 @@ client.on('ready', function () {
 });
 client.on('message', function (msg) {
     var message = msg.content;
-    if (message == 'ping') {
-        msg.reply('pong');
+    var channelID = msg.channel.id;
+    var command = message.split(' ')[0];
+    var args = message.split(' ');
+    switch (command) {
+        case 'ping':
+            msg.reply('pong');
+            break;
+        case 'getbook':
+            if (args.length == 1) {
+                if (args[1].length == 10 || args[1].length == 13) {
+                    //let isbn: string = "9780140328721";
+                    var isbn = args[1];
+                    getBookInfo(isbn, msg);
+                }
+            }
+            else {
+                msg.reply("Pasa un isbn porfavor :upside_down_face:");
+            }
+            break;
     }
-    else if (message == 'marco' || message == 'Marco') {
-        msg.reply('Polooo');
-    }
-    else if (message == 'getbook') {
-        var isbn = "9780140328721";
-        getBookInfo(isbn, msg);
-    }
+    ;
 });
 client.login(process.env.TOKEN);

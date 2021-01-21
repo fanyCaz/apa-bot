@@ -7,30 +7,45 @@ const axios = require('axios').default;
 const Discord = require('discord.js');
 const client = new Discord.Client();
 
-let apaReply = function(response:any): string{
-	let authors:string = (response["authors"]) ? response["authors"] : "xxx";
+let apaReply = function(response:any, author:string): string{
 	let yearPublished:string = (response["publish_date"]) ? response["publish_date"].slice(-4) : "xxx";
 	let title:string = (response["title"]) ? response["title"] : "xxx";
 	let publisher:string = (response["publishers"]) ? response["publishers"][0] : "xxx";
-	let reply:string = `${authors}.(${yearPublished}).${title}.${publisher}`;
+	let reply:string = `${author}(${yearPublished}).${title}.${publisher}`;
 	return reply;
 }
 
 /*REQUEST TO OPEN LIBRARY*/
-async function getBookInfo(isbn:string, msg:any){
-	let openLibraryURL: string = "https://openlibrary.org/isbn/";
-	let reply:any = await axios.get(openLibraryURL+isbn+".json")
+async function getAuthorInfo(authorKey:string){
+	let openLibraryURL:string = "https://openlibrary.org/authors/";
+	let authorData:any = await axios.get(`${openLibraryURL}${authorKey}.json`)
 		.then(function(response){
-			console.log(response.data);
 			return response;
 		})
 		.catch(function(error){
-			console.log(error);
+			return error;
+		});
+	if(authorData.status == 200){
+		return authorData.data["personal_name"];
+	}else{
+		return "xxx";
+	}
+}
+
+async function getBookInfo(isbn:string, msg:any){
+	let openLibraryURL: string = "https://openlibrary.org/isbn/";
+	let reply:any = await axios.get(`${openLibraryURL}${isbn}.json`)
+		.then(function(response){
+			return response;
+		})
+		.catch(function(error){
 			return error;
 		});
 
 	if(reply.status == 200){
-		let citation:string = apaReply(reply);
+		let authorID:string = reply.data["authors"][0].key.split('/')[2];
+		let authorName:string = await getAuthorInfo(authorID);
+		let citation:string = apaReply(reply.data,authorName);
 		msg.reply(citation);
 	}else{
 		msg.reply("No se ha encontrado el libro :c");

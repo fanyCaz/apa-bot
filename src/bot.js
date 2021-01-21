@@ -39,40 +39,72 @@ require('dotenv').config();
 var axios = require('axios')["default"];
 var Discord = require('discord.js');
 var client = new Discord.Client();
-var apaReply = function (response) {
-    var authors = (response["authors"]) ? response["authors"] : "xxx";
+function getAuthorInfo(authorKey) {
+    return __awaiter(this, void 0, void 0, function () {
+        var openLibraryURL, authorData;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    openLibraryURL = "https://openlibrary.org/authors/";
+                    return [4 /*yield*/, axios.get("" + openLibraryURL + authorKey + ".json")
+                            .then(function (response) {
+                            console.log(response.data);
+                            return response;
+                        })["catch"](function (error) {
+                            return error;
+                        })];
+                case 1:
+                    authorData = _a.sent();
+                    console.log("end");
+                    if (authorData.status == 200) {
+                        return [2 /*return*/, authorData.data["personal_name"]];
+                    }
+                    else {
+                        return [2 /*return*/, "xxx"];
+                    }
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+var apaReply = function (response, author) {
+    //let authors:string = (response["authors"] == "string") ? response["authors"] : "xxx";
     var yearPublished = (response["publish_date"]) ? response["publish_date"].slice(-4) : "xxx";
     var title = (response["title"]) ? response["title"] : "xxx";
     var publisher = (response["publishers"]) ? response["publishers"][0] : "xxx";
-    var reply = authors + ".(" + yearPublished + ")." + title + "." + publisher;
+    var reply = author + ".(" + yearPublished + ")." + title + "." + publisher;
     return reply;
 };
 /*REQUEST TO OPEN LIBRARY*/
 function getBookInfo(isbn, msg) {
     return __awaiter(this, void 0, void 0, function () {
-        var openLibraryURL, reply, citation;
+        var openLibraryURL, reply, authorID, authorName, citation;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     openLibraryURL = "https://openlibrary.org/isbn/";
-                    return [4 /*yield*/, axios.get(openLibraryURL + isbn + ".json")
+                    return [4 /*yield*/, axios.get("" + openLibraryURL + isbn + ".json")
                             .then(function (response) {
-                            console.log(response.data);
                             return response;
                         })["catch"](function (error) {
-                            console.log(error);
                             return error;
                         })];
                 case 1:
                     reply = _a.sent();
-                    if (reply.status == 200) {
-                        citation = apaReply(reply);
-                        msg.reply(citation);
-                    }
-                    else {
-                        msg.reply("No se ha encontrado el libro :c");
-                    }
-                    return [2 /*return*/];
+                    if (!(reply.status == 200)) return [3 /*break*/, 3];
+                    authorID = reply.data["authors"][0].key.split('/')[2];
+                    console.log("id. " + authorID);
+                    return [4 /*yield*/, getAuthorInfo(authorID)];
+                case 2:
+                    authorName = _a.sent();
+                    console.log("name author: " + authorName);
+                    citation = apaReply(reply.data, authorName);
+                    msg.reply(citation);
+                    return [3 /*break*/, 4];
+                case 3:
+                    msg.reply("No se ha encontrado el libro :c");
+                    _a.label = 4;
+                case 4: return [2 /*return*/];
             }
         });
     });
@@ -86,18 +118,16 @@ client.on('message', function (msg) {
     var channelID = msg.channel.id;
     var command = message.split(' ')[0];
     var args = message.split(' ');
-    console.log(command);
-    console.log(args);
     switch (command) {
         case 'ping':
             msg.reply('pong');
             break;
         case 'getbook':
             if (args.length > 1) {
-                //if(args[1].length == 10 || args[1].length == 13){
-                var isbn = args[1];
-                getBookInfo(isbn, msg);
-                //}
+                if (args[1].length == 10 || args[1].length == 13) {
+                    var isbn = args[1];
+                    getBookInfo(isbn, msg);
+                }
             }
             else {
                 msg.reply("Pasa un isbn porfavor :upside_down_face:");

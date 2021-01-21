@@ -40,10 +40,10 @@ var axios = require('axios')["default"];
 var Discord = require('discord.js');
 var client = new Discord.Client();
 var apaReply = function (response) {
-    var authors = "not yet";
-    var yearPublished = response["publish_date"].slice(-4);
-    var title = response["title"];
-    var publisher = response["publishers"][0];
+    var authors = (response["authors"]) ? response["authors"] : "xxx";
+    var yearPublished = (response["publish_date"]) ? response["publish_date"].slice(-4) : "xxx";
+    var title = (response["title"]) ? response["title"] : "xxx";
+    var publisher = (response["publishers"]) ? response["publishers"][0] : "xxx";
     var reply = authors + ".(" + yearPublished + ")." + title + "." + publisher;
     return reply;
 };
@@ -58,15 +58,20 @@ function getBookInfo(isbn, msg) {
                     return [4 /*yield*/, axios.get(openLibraryURL + isbn + ".json")
                             .then(function (response) {
                             console.log(response.data);
-                            return response.data;
+                            return response;
                         })["catch"](function (error) {
                             console.log(error);
-                            return "No he podido obtener el libro :tired_face:";
+                            return error;
                         })];
                 case 1:
                     reply = _a.sent();
-                    citation = apaReply(reply);
-                    msg.reply(citation);
+                    if (reply.status == 200) {
+                        citation = apaReply(reply);
+                        msg.reply(citation);
+                    }
+                    else {
+                        msg.reply("No se ha encontrado el libro :c");
+                    }
                     return [2 /*return*/];
             }
         });
@@ -81,17 +86,18 @@ client.on('message', function (msg) {
     var channelID = msg.channel.id;
     var command = message.split(' ')[0];
     var args = message.split(' ');
+    console.log(command);
+    console.log(args);
     switch (command) {
         case 'ping':
             msg.reply('pong');
             break;
         case 'getbook':
-            if (args.length == 1) {
-                if (args[1].length == 10 || args[1].length == 13) {
-                    //let isbn: string = "9780140328721";
-                    var isbn = args[1];
-                    getBookInfo(isbn, msg);
-                }
+            if (args.length > 1) {
+                //if(args[1].length == 10 || args[1].length == 13){
+                var isbn = args[1];
+                getBookInfo(isbn, msg);
+                //}
             }
             else {
                 msg.reply("Pasa un isbn porfavor :upside_down_face:");

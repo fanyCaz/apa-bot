@@ -8,10 +8,10 @@ const Discord = require('discord.js');
 const client = new Discord.Client();
 
 let apaReply = function(response:any): string{
-	let authors:string = "not yet";
-	let yearPublished:string = response["publish_date"].slice(-4);
-	let title:string = response["title"];
-	let publisher:string = response["publishers"][0];
+	let authors:string = (response["authors"]) ? response["authors"] : "xxx";
+	let yearPublished:string = (response["publish_date"]) ? response["publish_date"].slice(-4) : "xxx";
+	let title:string = (response["title"]) ? response["title"] : "xxx";
+	let publisher:string = (response["publishers"]) ? response["publishers"][0] : "xxx";
 	let reply:string = `${authors}.(${yearPublished}).${title}.${publisher}`;
 	return reply;
 }
@@ -22,16 +22,19 @@ async function getBookInfo(isbn:string, msg:any){
 	let reply:any = await axios.get(openLibraryURL+isbn+".json")
 		.then(function(response){
 			console.log(response.data);
-			return response.data;
+			return response;
 		})
 		.catch(function(error){
 			console.log(error);
-			return "No he podido obtener el libro :tired_face:";
+			return error;
 		});
 
-
-	let citation:string = apaReply(reply);
-	msg.reply(citation);
+	if(reply.status == 200){
+		let citation:string = apaReply(reply);
+		msg.reply(citation);
+	}else{
+		msg.reply("No se ha encontrado el libro :c");
+	}
 };
 
 client.on('ready', () => {
@@ -49,9 +52,8 @@ client.on('message', msg =>{
 			msg.reply('pong');
 			break;
 		case 'getbook':
-			if(args.length == 1 ){
+			if(args.length > 1 ){
 				if(args[1].length == 10 || args[1].length == 13){
-					//let isbn: string = "9780140328721";
 					let isbn:string = args[1];
 					getBookInfo(isbn,msg);
 				}

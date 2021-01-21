@@ -39,6 +39,14 @@ require('dotenv').config();
 var axios = require('axios')["default"];
 var Discord = require('discord.js');
 var client = new Discord.Client();
+var apaReply = function (response, author) {
+    var yearPublished = (response["publish_date"]) ? response["publish_date"].slice(-4) : "xxx";
+    var title = (response["title"]) ? response["title"] : "xxx";
+    var publisher = (response["publishers"]) ? response["publishers"][0] : "xxx";
+    var reply = author + "(" + yearPublished + ")." + title + "." + publisher;
+    return reply;
+};
+/*REQUEST TO OPEN LIBRARY*/
 function getAuthorInfo(authorKey) {
     return __awaiter(this, void 0, void 0, function () {
         var openLibraryURL, authorData;
@@ -48,14 +56,12 @@ function getAuthorInfo(authorKey) {
                     openLibraryURL = "https://openlibrary.org/authors/";
                     return [4 /*yield*/, axios.get("" + openLibraryURL + authorKey + ".json")
                             .then(function (response) {
-                            console.log(response.data);
                             return response;
                         })["catch"](function (error) {
                             return error;
                         })];
                 case 1:
                     authorData = _a.sent();
-                    console.log("end");
                     if (authorData.status == 200) {
                         return [2 /*return*/, authorData.data["personal_name"]];
                     }
@@ -67,15 +73,6 @@ function getAuthorInfo(authorKey) {
         });
     });
 }
-var apaReply = function (response, author) {
-    //let authors:string = (response["authors"] == "string") ? response["authors"] : "xxx";
-    var yearPublished = (response["publish_date"]) ? response["publish_date"].slice(-4) : "xxx";
-    var title = (response["title"]) ? response["title"] : "xxx";
-    var publisher = (response["publishers"]) ? response["publishers"][0] : "xxx";
-    var reply = author + ".(" + yearPublished + ")." + title + "." + publisher;
-    return reply;
-};
-/*REQUEST TO OPEN LIBRARY*/
 function getBookInfo(isbn, msg) {
     return __awaiter(this, void 0, void 0, function () {
         var openLibraryURL, reply, authorID, authorName, citation;
@@ -93,11 +90,9 @@ function getBookInfo(isbn, msg) {
                     reply = _a.sent();
                     if (!(reply.status == 200)) return [3 /*break*/, 3];
                     authorID = reply.data["authors"][0].key.split('/')[2];
-                    console.log("id. " + authorID);
                     return [4 /*yield*/, getAuthorInfo(authorID)];
                 case 2:
                     authorName = _a.sent();
-                    console.log("name author: " + authorName);
                     citation = apaReply(reply.data, authorName);
                     msg.reply(citation);
                     return [3 /*break*/, 4];

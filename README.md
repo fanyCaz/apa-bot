@@ -1,5 +1,6 @@
 # apa-bot
-Bot that gets the APA reference of any book ... as long it is available in this page: https://openlibrary.org/developers/api.
+Bot that gets the APA reference of any book ... as long as it is available in this page: https://openlibrary.org/developers/api.
+Now I want to include movies too... as long as they're available in this page: https://imdb-api.com/api
 
 ## To make it work in your computer
 1. Get in folder source: ```cd src```

@@ -7,6 +7,39 @@ const axios = require('axios').default;
 const Discord = require('discord.js');
 const client = new Discord.Client();
 
+async function iterateMovies(movie:any){
+	let result:any = await axios.get('https://imdb-api.com/en/API/Title/',{
+		params: {
+		 apiKey: process.env.API_KEY,
+		 Id: movie['id']	
+		}
+		}).then(function(res){
+		  return res['data'];	
+		}).catch(function(err){
+			return err;		
+		});
+		console.log(result);
+}
+
+
+/*REQUEST TO IMDB*/
+async function getMovieInfo(expression:string){
+	let result:any = await axios.get('https://imdb-api.com/en/API/SearchMovie/',{
+		params: {
+			apiKey: process.env.API_KEY,
+			expression: expression 
+		}	
+	}).then(function(res){
+		return res['data'];
+	}).catch(function(err){
+		return err;
+	});
+	if(result['results'].length < 1){
+		return 'No existe esa película :woman_shrugging:';
+	}
+	await iterateMovies(result['results'][0])
+}
+
 let apaReply = function(response:any, author:string): string{
 	let yearPublished:string = (response["publish_date"]) ? response["publish_date"].slice(-4) : "xxx";
 	let title:string = (response["title"]) ? response["title"] : "xxx";
@@ -76,6 +109,13 @@ client.on('message', msg =>{
 				msg.reply("Pasa un isbn porfavor :upside_down_face:");
 			}
 			break;
+		case 'getmovie':
+			if(args.length > 1){
+				args.shift();
+				let search_expression:string = args.join(' ');
+				console.log(search_expression)
+				getMovieInfo(search_expression);
+			}
 	};
 });
 

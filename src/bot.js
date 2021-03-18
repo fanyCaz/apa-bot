@@ -39,6 +39,58 @@ require('dotenv').config();
 var axios = require('axios')["default"];
 var Discord = require('discord.js');
 var client = new Discord.Client();
+function iterateMovies(movie) {
+    return __awaiter(this, void 0, void 0, function () {
+        var result;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, axios.get('https://imdb-api.com/en/API/Title/', {
+                        params: {
+                            apiKey: process.env.API_KEY,
+                            Id: movie['id']
+                        }
+                    }).then(function (res) {
+                        return res['data'];
+                    })["catch"](function (err) {
+                        return err;
+                    })];
+                case 1:
+                    result = _a.sent();
+                    console.log(result);
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+/*REQUEST TO IMDB*/
+function getMovieInfo(expression) {
+    return __awaiter(this, void 0, void 0, function () {
+        var result;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, axios.get('https://imdb-api.com/en/API/SearchMovie/', {
+                        params: {
+                            apiKey: process.env.API_KEY,
+                            expression: expression
+                        }
+                    }).then(function (res) {
+                        return res['data'];
+                    })["catch"](function (err) {
+                        return err;
+                    })];
+                case 1:
+                    result = _a.sent();
+                    if (result['results'].length < 1) {
+                        return [2 /*return*/, 'No existe esa película :woman_shrugging:'];
+                    }
+                    return [4 /*yield*/, iterateMovies(result['results'][0])];
+                case 2:
+                    _a.sent();
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
 var apaReply = function (response, author) {
     var yearPublished = (response["publish_date"]) ? response["publish_date"].slice(-4) : "xxx";
     var title = (response["title"]) ? response["title"] : "xxx";
@@ -128,6 +180,13 @@ client.on('message', function (msg) {
                 msg.reply("Pasa un isbn porfavor :upside_down_face:");
             }
             break;
+        case 'getmovie':
+            if (args.length > 1) {
+                args.shift();
+                var search_expression = args.join(' ');
+                console.log(search_expression);
+                getMovieInfo(search_expression);
+            }
     }
     ;
 });

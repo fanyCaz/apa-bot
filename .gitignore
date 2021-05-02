@@ -1,6 +1,8 @@
 # Node Modules
 node_modules/
 
+#Javascript
+dist/
 
 # Environments
 .env

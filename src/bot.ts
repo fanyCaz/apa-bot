@@ -14,7 +14,9 @@ function apaReply(response: any, author: string): string{
 
 /*MOVIE*/
 async function getMovieInfo(expression: string){
-  let response: any = await axios.get('https://imdb-api.com/en/API/SearchMovie/',{
+	console.log(expression);
+	const embed = new Discord.MessageEmbed();
+	/* let response: any = await axios.get('https://imdb-api.com/en/API/SearchMovie/',{
     params:{
       apiKey: process.env.API_KEY,
       expression: expression
@@ -26,7 +28,7 @@ async function getMovieInfo(expression: string){
     });
 	if(response.errorMessage != ""){
 		
-	}
+	}*/
 }
 
 /*BOOK*/
@@ -79,13 +81,14 @@ client.on('ready', () =>{
 client.on('message', (msg: any) =>{
     let message: string = msg.content;
 
-    let command: string = message.split(' ')[0];
-    let args = message.split(' ');
+    let args: string[] = message.split(' ');
+		let command = args.shift();
     switch(command){
       case 'ping':
         msg.reply('pong');
       break;
       case 'libro':
+    		args = message.split(' ');
         if(args[1] != null){
           let isbn: string = args[1];
           if(isbn.length == 13 || isbn.length == 10){
@@ -96,7 +99,11 @@ client.on('message', (msg: any) =>{
         }
       break;
       case 'pelicula':
-        
+				args = args.join(' ');
+				console.log(args);
+				if(args.length > 1){
+					getMovieInfo(args);
+				}
       break;
     }
 });

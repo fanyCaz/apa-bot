@@ -79,7 +79,6 @@ client.on('message', (msg: any) =>{
 				}
 			break;
 		}
-		
 });
 
 client.login(process.env.TOKEN);

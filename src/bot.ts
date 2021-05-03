@@ -67,10 +67,10 @@ client.on('message', (msg: any) =>{
 		switch(command){
 			case 'ping':
 				msg.reply('pong');
-				break;
+			break;
 			case 'libro':
-			  if(args[1] != null){
-			 	  let isbn: string = args[1];
+				if(args[1] != null){
+					let isbn: string = args[1];
 					if(isbn.length == 13 || isbn.length == 10){
 						getBookInfo(isbn, msg);
 					}else{

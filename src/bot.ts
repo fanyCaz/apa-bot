@@ -13,22 +13,53 @@ function apaReply(response: any, author: string): string{
 }
 
 /*MOVIE*/
-async function getMovieInfo(expression: string){
-	console.log(expression);
-	const embed = new Discord.MessageEmbed();
-	/* let response: any = await axios.get('https://imdb-api.com/en/API/SearchMovie/',{
+async function getTitleInfo(movie_id: string){
+  let response: any = await axios.get('https://imdb-api.com/en/API/Title/',{
+    params: {
+		  apiKey: process.env.API_KEY,
+      id: movie_id
+		}
+		}).then(function(res: any){
+		  return res;
+		}).catch(function(error: any){
+		  return error;
+		});
+
+  if(response.status == 200){
+	  return response.data;
+  }
+	return 500;
+}
+
+async function getMovieInfo(expression: string, msg: any){
+	let response: any = await axios.get('https://imdb-api.com/en/API/SearchMovie/',{
     params:{
       apiKey: process.env.API_KEY,
       expression: expression
     }
-    }).then(function(res){
+    }).then(function(res: any){
       return res;
-    }).catch(function(error){
+    }).catch(function(error: any){
       return error;
     });
-	if(response.errorMessage != ""){
-		
-	}*/
+	if(response.data.errorMessage == ""){
+	  if(response.data.results){
+		  let movie_id: string = response.data.results[0].id;
+		  let title_info: any = await getTitleInfo(movie_id);
+			if(title_info != 500){
+			  const embeded = new Discord.MessageEmbed()
+				.setTitle(title_info.fullTitle)
+				.setDescription(`**Plot**: ${title_info.plot} **Dirige** ${title_info.directors}`)
+        .setImage(title_info.image)
+				.setFooter(`Duración: ${title_info.runtimeStr} Reparto: ${title_info.stars}`);
+				msg.channel.send(embeded);
+			}else{
+			  msg.reply("No se ha encontrado :confused:")
+			}
+		}else{
+		  msg.reply("Hubo un error, pls stand by :skull:");
+		}
+	}
 }
 
 /*BOOK*/
@@ -82,13 +113,13 @@ client.on('message', (msg: any) =>{
     let message: string = msg.content;
 
     let args: string[] = message.split(' ');
-		let command = args.shift();
+    let command = args.shift();
     switch(command){
       case 'ping':
         msg.reply('pong');
       break;
       case 'libro':
-    		args = message.split(' ');
+			  args = message.split(' ');
         if(args[1] != null){
           let isbn: string = args[1];
           if(isbn.length == 13 || isbn.length == 10){
@@ -99,10 +130,12 @@ client.on('message', (msg: any) =>{
         }
       break;
       case 'pelicula':
-				args = args.join(' ');
-				console.log(args);
+				let exp: string = args.join(' ');
 				if(args.length > 1){
-					getMovieInfo(args);
+				  msg.reply("Dame unos segundos para buscar uwu");
+					getMovieInfo(exp, msg);
+			  }else{
+				  msg.reply("Pasa el nombre de una película :upside_down_face:"          );
 				}
       break;
     }

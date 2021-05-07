@@ -42,6 +42,11 @@ async function getMovieInfo(expression: string, msg: any){
     }).catch(function(error: any){
       return error;
     });
+	console.log(response.status);
+	if(response.status != 200){
+	 msg.reply("mmmm puede que el servicio de IMDB esté down :frowning:");
+	 return;
+	}
 	if(response.data.errorMessage == ""){
 	  if(response.data.results){
 		  let movie_id: string = response.data.results[0].id;
@@ -111,14 +116,14 @@ client.on('ready', () =>{
 
 client.on('message', (msg: any) =>{
     let message: string = msg.content;
-
+		/*LOS COMANDOS DEBEN EMPEZAR CON '!' PARA NO CONFUNDIR CON MSG NORMAL DEL CHAT, O HACER QUE SOLO RESPONDA EN UN CHANNEL ESPECÍFICO*/
     let args: string[] = message.split(' ');
     let command = args.shift();
     switch(command){
       case 'ping':
         msg.reply('pong');
       break;
-      case 'libro':
+      case '!libro':
 			  args = message.split(' ');
         if(args[1] != null){
           let isbn: string = args[1];
@@ -129,13 +134,13 @@ client.on('message', (msg: any) =>{
           }
         }
       break;
-      case 'pelicula':
-				let exp: string = args.join(' ');
-				if(args.length > 1){
+      case '!pelicula':
+        let exp: string = args.join(' ');
+        if(exp.length > 1){
 				  msg.reply("Dame unos segundos para buscar uwu");
 					getMovieInfo(exp, msg);
 			  }else{
-				  msg.reply("Pasa el nombre de una película :upside_down_face:"          );
+          msg.reply("Pasa el nombre de una película :upside_down_face:");
 				}
       break;
     }

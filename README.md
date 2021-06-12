@@ -11,10 +11,5 @@ or ```yarn watch```
 ### Also
 This is the first time using Node, TypeScript and Javascript(without wanting to end it all), so, this is as good as it gets.
 
-Edit:
+Edit:\
 So I think its cleaner now, but we'll see
-
-## Road Map
-
-- [ ] get trailer of movie searched
-- [ ] allow '-' in isbn search

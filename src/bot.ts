@@ -34,7 +34,7 @@ async function getTitleInfo(movie_id: string){
 }
 
 async function getMovieInfo(expression: string, msg: any){
-	let response: any = await axios.get('https://imdb-api.com/en/API/SearchMovie/',{
+  let response: any = await axios.get('https://imdb-api.com/en/API/SearchMovie/',{
     params:{
       apiKey: process.env.API_KEY,
       expression: expression
@@ -44,29 +44,26 @@ async function getMovieInfo(expression: string, msg: any){
     }).catch(function(error: any){
       return error;
     });
-	console.log(response.status);
 	if(response.status != 200 || response == undefined){
 	 msg.reply("mmmm puede que el servicio de IMDB esté down :frowning:");
 	 return;
 	}
-	if(response.data.errorMessage == ""){
-	  if(response.data.results){
-		  let movie_id: string = response.data.results[0].id;
-		  let title_info: any = await getTitleInfo(movie_id);
-			if(title_info != 500){
-			  const embeded = new Discord.MessageEmbed()
-				.setTitle(title_info.fullTitle)
-				.setDescription(`**Plot**: ${title_info.plot} **Dirige** ${title_info.directors}`)
+  if(response.data.results){
+    let movie_id: string = response.data.results[0].id;
+    let title_info: any = await getTitleInfo(movie_id);
+		if(title_info != 500){
+      const embeded = new Discord.MessageEmbed()
+        .setTitle(title_info.fullTitle)
+        .setDescription(`**Plot**: ${title_info.plot} **Dirige** ${title_info.directors}`)
         .setImage(title_info.image)
-				.setFooter(`Duración: ${title_info.runtimeStr} Reparto: ${title_info.stars}`);
-				msg.channel.send(embeded);
-			}else{
-			  msg.reply("No se ha encontrado :confused:")
-			}
-		}else{
-		  msg.reply("Hubo un error, pls stand by :skull:");
-		}
-	}
+        .setFooter(`Duración: ${title_info.runtimeStr} Reparto: ${title_info.stars}`);
+        msg.channel.send(embeded);
+      }else{
+        msg.reply("No se ha encontrado :confused:")
+      }
+  }else{
+     msg.reply("Hubo un error :skull:");
+  }
 }
 
 /*BOOK*/
@@ -138,7 +135,7 @@ client.on('message', (msg: any) =>{
         let isbn: string = args[0].replace(/-/gi,'');
         if(isbn.length == 13 || isbn.length == 10){
           msg.reply("Dame unos segundos para buscar uwu");
-          //getBookInfo(isbn, msg);
+          getBookInfo(isbn, msg);
         }else{
           msg.reply("Pasa un isbn porfavor :upside_down_face:");
         }

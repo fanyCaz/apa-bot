@@ -3,6 +3,8 @@
 require('dotenv').config();
 
 const axios = require('axios').default;
+const instance = axios.create();
+instance.defaults.timeout = 2500;
 
 /*MAKE A MESSAGE*/
 function apaReply(response: any, author: string): string{
@@ -86,11 +88,13 @@ async function getAuthorInfo(author_key: string){
 
 async function getBookInfo(isbn:string, msg: any){ 
   let openLibraryURL: string = "https://openlibrary.org/isbn/";
-  let response: any = await axios.get(`${openLibraryURL}${isbn}.json`)
+  let response: any = await instance.get(`${openLibraryURL}${isbn}.json`)
                       .then(function(res: any){
                         return res;
                       })
                       .catch(function(error: any){
+                        console.log("error")
+                        console.log(error);
                         return error;
                       });
   if(response.status == 200){
@@ -101,7 +105,9 @@ async function getBookInfo(isbn:string, msg: any){
     }
     let reference: string = apaReply(response.data, author);
     msg.reply(reference);
-  }else{
+  }else if(response.code == "ECONNABORTED"){
+    msg.reply("Puede que el servicio de OpenLibrary se haya caído, confiemos que se repondrá :pray:");
+  } else{
     msg.reply("No fue encontrado :confused:");
   }
 }
@@ -111,7 +117,7 @@ const Discord = require('discord.js');
 const client = new Discord.Client();
 
 client.on('ready', () =>{
-    console.log(`logged in ${client.user.tag}`);
+  console.log(`logged in ${client.user.tag}`);
 });
 
 client.on('message', (msg: any) =>{
@@ -124,10 +130,10 @@ client.on('message', (msg: any) =>{
         msg.reply('pong');
       break;
       case '!libro':
-			  args = message.split(' ');
-        if(args[1] != null){
-          let isbn: string = args[1];
+        if(args[0] != null){
+          let isbn: string = args[0];
           if(isbn.length == 13 || isbn.length == 10){
+            msg.reply("Dame unos segundos para buscar uwu");
             getBookInfo(isbn, msg);
           }else{
             msg.reply("Pasa un isbn porfavor :upside_down_face:")

@@ -131,7 +131,8 @@ client.on('message', (msg: any) =>{
       break;
       case '!libro':
         if(args[0] != null){
-          let isbn: string = args[0];
+          //replace the '-' with no space
+          let isbn: string = args[0].replace(/-/gi,'');
           if(isbn.length == 13 || isbn.length == 10){
             msg.reply("Dame unos segundos para buscar uwu");
             getBookInfo(isbn, msg);

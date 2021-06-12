@@ -15,6 +15,30 @@ function apaReply(response: any, author: string): string{
 }
 
 /*MOVIE*/
+async function getTrailer(movie_id: string, msg: any){
+  let response: any = await instance.get('https://imdb-api.com/en/API/Trailer/',{
+    params: {
+      apiKey: process.env.API_KEY,
+      id: movie_id
+    }
+  }).then(function(res: any){
+     return res;
+  }).catch(function(error: any){
+     return error;
+  });
+
+  if(response.status == 200){
+    let trailer_info = response.data;
+    const embeded = new Discord.MessageEmbed()
+      .setTitle(`Trailer: ${trailer_info.fullTitle}`)
+      .setDescription(trailer_info.videoDescription)
+      .setURL(trailer_info.link);
+    msg.channel.send(embeded);
+  }else{
+    msg.reply("No se ha encontrado un trailer :hole:");
+  }
+}
+
 async function getTitleInfo(movie_id: string){
   let response: any = await axios.get('https://imdb-api.com/en/API/Title/',{
     params: {
@@ -58,9 +82,10 @@ async function getMovieInfo(expression: string, msg: any){
         .setImage(title_info.image)
         .setFooter(`Duración: ${title_info.runtimeStr} Reparto: ${title_info.stars}`);
         msg.channel.send(embeded);
-      }else{
-        msg.reply("No se ha encontrado :confused:")
-      }
+      getTrailer(movie_id, msg);
+    }else{
+      msg.reply("No se ha encontrado :confused:")
+    }
   }else{
      msg.reply("Hubo un error :skull:");
   }

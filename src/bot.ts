@@ -107,7 +107,7 @@ async function getBookInfo(isbn:string, msg: any){
     msg.reply(reference);
   }else if(response.code == "ECONNABORTED"){
     msg.reply("Puede que el servicio de OpenLibrary se haya caído, confiemos que se repondrá :pray:");
-  } else{
+  }else{
     msg.reply("No fue encontrado :confused:");
   }
 }
@@ -121,36 +121,39 @@ client.on('ready', () =>{
 });
 
 client.on('message', (msg: any) =>{
-    let message: string = msg.content;
-		/*LOS COMANDOS DEBEN EMPEZAR CON '!' PARA NO CONFUNDIR CON MSG NORMAL DEL CHAT, O HACER QUE SOLO RESPONDA EN UN CHANNEL ESPECÍFICO*/
-    let args: string[] = message.split(' ');
-    let command = args.shift();
-    switch(command){
-      case 'ping':
-        msg.reply('pong');
+  let message: string = msg.content;
+  if(msg.author.bot){
+    return;
+  }
+  /*LOS COMANDOS DEBEN EMPEZAR CON '!' PARA NO CONFUNDIR CON MSG NORMAL DEL CHAT, O HACER QUE SOLO RESPONDA EN UN CHANNEL ESPECÍFICO*/
+  let args: string[] = message.split(' ');
+  let command = args.shift();
+  switch(command){
+    case 'ping':
+      msg.reply('pong');
       break;
-      case '!libro':
-        if(args[0] != null){
-          //replace the '-' with no space
-          let isbn: string = args[0].replace(/-/gi,'');
-          if(isbn.length == 13 || isbn.length == 10){
-            msg.reply("Dame unos segundos para buscar uwu");
-            getBookInfo(isbn, msg);
-          }else{
-            msg.reply("Pasa un isbn porfavor :upside_down_face:")
-          }
+    case '!libro':
+      if(args[0] != null){
+        //replace the '-' with no space
+        let isbn: string = args[0].replace(/-/gi,'');
+        if(isbn.length == 13 || isbn.length == 10){
+          msg.reply("Dame unos segundos para buscar uwu");
+          //getBookInfo(isbn, msg);
+        }else{
+          msg.reply("Pasa un isbn porfavor :upside_down_face:");
         }
+      }
       break;
-      case '!pelicula':
-        let exp: string = args.join(' ');
-        if(exp.length > 1){
-				  msg.reply("Dame unos segundos para buscar uwu");
-					getMovieInfo(exp, msg);
-			  }else{
-          msg.reply("Pasa el nombre de una película :upside_down_face:");
-				}
+    case '!pelicula':
+      let exp: string = args.join(' ');
+      if(exp.length > 1){
+        msg.reply("Dame unos segundos para buscar uwu");
+        getMovieInfo(exp, msg);
+      }else{
+        msg.reply("Pasa el nombre de una película :upside_down_face:");
+      }
       break;
-    }
+  }
 });
 
 client.login(process.env.TOKEN);

@@ -43,7 +43,7 @@ async function getMovieInfo(expression: string, msg: any){
       return error;
     });
 	console.log(response.status);
-	if(response.status != 200){
+	if(response.status != 200 || response == undefined){
 	 msg.reply("mmmm puede que el servicio de IMDB esté down :frowning:");
 	 return;
 	}

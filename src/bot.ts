@@ -15,7 +15,7 @@ function apaReply(response: any, author: string): string{
 }
 
 /*MOVIE*/
-async function getTrailer(movie_id: string, msg: any){
+async function sendTrailerInfo(movie_id: string, msg: any){
   let response: any = await instance.get('https://imdb-api.com/en/API/Trailer/',{
     params: {
       apiKey: process.env.API_KEY,
@@ -29,9 +29,11 @@ async function getTrailer(movie_id: string, msg: any){
 
   if(response.status == 200){
     let trailer_info = response.data;
+    console.log(trailer_info);
+    let description: string = (trailer_info.linkEmbed) ? `Si no te funciona el título, usa este: ${trailer_info.linkEmbed}` : ``;
     const embeded = new Discord.MessageEmbed()
       .setTitle(`Trailer: ${trailer_info.fullTitle}`)
-      .setDescription(trailer_info.videoDescription)
+      .setDescription(description)
       .setURL(trailer_info.link);
     msg.channel.send(embeded);
   }else{
@@ -57,7 +59,22 @@ async function getTitleInfo(movie_id: string){
 	return 500;
 }
 
-async function getMovieInfo(expression: string, msg: any){
+async function sendMovieInfo(movie_id: string, msg: any){
+  let title_info: any = await getTitleInfo(movie_id);
+  if(title_info != 500){
+    const embeded = new Discord.MessageEmbed()
+      .setTitle(title_info.fullTitle)
+      .setDescription(`**Plot**: ${title_info.plot} **Dirige** ${title_info.directors}`)
+      .setImage(title_info.image)
+      .setFooter(`Duración: ${title_info.runtimeStr} Reparto: ${title_info.stars}`);
+      msg.channel.send(embeded);
+    sendTrailerInfo(movie_id, msg);
+  }else{
+    msg.reply("No se ha encontrado :confused:")
+  }
+}
+
+async function getMovieInfo(expression: string, msg: any, type_request: string){
   let response: any = await axios.get('https://imdb-api.com/en/API/SearchMovie/',{
     params:{
       apiKey: process.env.API_KEY,
@@ -68,23 +85,19 @@ async function getMovieInfo(expression: string, msg: any){
     }).catch(function(error: any){
       return error;
     });
-	if(response.status != 200 || response == undefined){
-	 msg.reply("mmmm puede que el servicio de IMDB esté down :frowning:");
-	 return;
-	}
+  if(response.status != 200 || response == undefined){
+    msg.reply("mmmm puede que el servicio de IMDB esté down :frowning:");
+    return;
+  }
   if(response.data.results){
     let movie_id: string = response.data.results[0].id;
-    let title_info: any = await getTitleInfo(movie_id);
-		if(title_info != 500){
-      const embeded = new Discord.MessageEmbed()
-        .setTitle(title_info.fullTitle)
-        .setDescription(`**Plot**: ${title_info.plot} **Dirige** ${title_info.directors}`)
-        .setImage(title_info.image)
-        .setFooter(`Duración: ${title_info.runtimeStr} Reparto: ${title_info.stars}`);
-        msg.channel.send(embeded);
-      getTrailer(movie_id, msg);
-    }else{
-      msg.reply("No se ha encontrado :confused:")
+    switch(type_request){
+      case 'movie':
+        sendMovieInfo(movie_id, msg);
+        break;
+      case 'trailer':
+        sendTrailerInfo(movie_id, msg);
+        break;
     }
   }else{
      msg.reply("Hubo un error :skull:");
@@ -170,7 +183,16 @@ client.on('message', (msg: any) =>{
       let exp: string = args.join(' ');
       if(exp.length > 1){
         msg.reply("Dame unos segundos para buscar uwu");
-        getMovieInfo(exp, msg);
+        getMovieInfo(exp, msg, 'movie');
+      }else{
+        msg.reply("Pasa el nombre de una película :upside_down_face:");
+      }
+      break;
+    case '!trailer':
+      let expression = args.join(' ');
+      if(expression.length > 1){
+        msg.reply("Dame unos segundos para buscar uwu");
+        getMovieInfo(expression, msg, 'trailer');
       }else{
         msg.reply("Pasa el nombre de una película :upside_down_face:");
       }

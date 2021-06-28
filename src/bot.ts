@@ -6,6 +6,15 @@ const axios = require('axios').default;
 const instance = axios.create();
 instance.defaults.timeout = 2500;
 
+function sendHelpCommands(msg: any){
+  let commands = "ping -> pong! \n !libro -> Dame un ISBN y traeré la referencia APA de ese libro (dependiendo de la información que encuentre) \n !pelicula -> Buscaré información y trailer de la película que me digas, como '!pelicula godzilla' \n !trailer -> Buscaré trailer de la película que me digas como '!trailer twilight' \n Toma en cuenta que estoy chiquito :pensive: y puedo cometer errores medio sonsos :pleading_face:";
+  const embeded = new Discord.MessageEmbed()
+    .setTitle("Comandos disponibles")
+    .setDescription(commands)
+    .setFooter("Sugerencias en issues de https://github.com/fanyCaz/apa-bot");
+  msg.channel.send(embeded);
+}
+
 /*MAKE A MESSAGE*/
 function apaReply(response: any, author: string): string{
   let year_published: string = (response["publish_date"]) ? response["publish_date"].slice(-4) : "xxx";
@@ -27,9 +36,8 @@ async function sendTrailerInfo(movie_id: string, msg: any){
      return error;
   });
 
-  if(response.status == 200){
+  if(response.status == 200 && response.data.errorMessage == ''){
     let trailer_info = response.data;
-    console.log(trailer_info);
     let description: string = (trailer_info.linkEmbed) ? `Si no te funciona el título, usa este: ${trailer_info.linkEmbed}` : ``;
     const embeded = new Discord.MessageEmbed()
       .setTitle(`Trailer: ${trailer_info.fullTitle}`)
@@ -196,6 +204,10 @@ client.on('message', (msg: any) =>{
       }else{
         msg.reply("Pasa el nombre de una película :upside_down_face:");
       }
+      break;
+    case '!ayuda':
+    case '!help':
+      sendHelpCommands(msg);
       break;
   }
 });

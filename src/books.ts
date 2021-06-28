@@ -7,7 +7,7 @@ apaAxios.defaults.timeout = 2500;
 const open_library_URL = "https://openlibrary.org/";
 
 function getFormattedApa(response: any, author: string): string{
-  let year_published: string = (response["publish_date"]) ? new Date(response["publish_date"]).getFullYear() : "...";
+  let year_published: string = (response["publish_date"]) ? new Date(response["publish_date"]).getFullYear().toString() : "...";
   let title: string = (response["title"]) ? response["title"] : "...";
   let publisher: string = (response["publishers"]) ? response["publishers"][0] : "...";
   return `${author} (${year_published}). *${title}*. ${publisher}`;

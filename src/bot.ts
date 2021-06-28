@@ -6,6 +6,8 @@ const axios = require('axios').default;
 const instance = axios.create();
 instance.defaults.timeout = 2500;
 
+import { getBookInfo } from "./books";
+
 function sendHelpCommands(msg: any){
   let commands = "ping -> pong! \n !libro -> Dame un ISBN y traeré la referencia APA de ese libro (dependiendo de la información que encuentre) \n !pelicula -> Buscaré información y trailer de la película que me digas, como '!pelicula godzilla' \n !trailer -> Buscaré trailer de la película que me digas como '!trailer twilight' \n Toma en cuenta que estoy chiquito :pensive: y puedo cometer errores medio sonsos :pleading_face:";
   const embeded = new Discord.MessageEmbed()
@@ -13,14 +15,6 @@ function sendHelpCommands(msg: any){
     .setDescription(commands)
     .setFooter("Sugerencias en issues de https://github.com/fanyCaz/apa-bot");
   msg.channel.send(embeded);
-}
-
-/*MAKE A MESSAGE*/
-function apaReply(response: any, author: string): string{
-  let year_published: string = (response["publish_date"]) ? response["publish_date"].slice(-4) : "xxx";
-  let title: string = (response["title"]) ? response["title"] : "xxx";
-  let publisher: string = (response["publishers"]) ? response["publishers"][0] : "xxx";
-  return `${author}(${year_published}).*${title}*.${publisher}`;
 }
 
 /*MOVIE*/
@@ -109,49 +103,6 @@ async function getMovieInfo(expression: string, msg: any, type_request: string){
     }
   }else{
      msg.reply("Hubo un error :skull:");
-  }
-}
-
-/*BOOK*/
-async function getAuthorInfo(author_key: string){
-  let openLibraryURL: string = "https://openlibrary.org/authors/";
-  let response: any = await axios.get(`${openLibraryURL}${author_key}.json`)
-            .then(function(res:any){
-              return res;
-            })
-            .catch(function(error: any){
-              return error;
-            });
-  if(response.status == 200){
-    return response.data["personal_name"];
-  }else{
-    "xxx";
-  }
-}
-
-async function getBookInfo(isbn:string, msg: any){ 
-  let openLibraryURL: string = "https://openlibrary.org/isbn/";
-  let response: any = await instance.get(`${openLibraryURL}${isbn}.json`)
-                      .then(function(res: any){
-                        return res;
-                      })
-                      .catch(function(error: any){
-                        console.log("error")
-                        console.log(error);
-                        return error;
-                      });
-  if(response.status == 200){
-    let author: string = "xxx";
-    if(response.data["authors"]){
-      let author_id: string = response.data["authors"][0].key.split('/')[2];
-      author = await getAuthorInfo(author_id);
-    }
-    let reference: string = apaReply(response.data, author);
-    msg.reply(reference);
-  }else if(response.code == "ECONNABORTED"){
-    msg.reply("Puede que el servicio de OpenLibrary se haya caído, confiemos que se repondrá :pray:");
-  }else{
-    msg.reply("No fue encontrado :confused:");
   }
 }
 

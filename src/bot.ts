@@ -162,6 +162,6 @@ client.on('message', (msg: any) =>{
       break;
   }
 });
-/* No se hacer pull requests y namas pongo este comentario para no afectar nada xd */
+/* No se hacer pull requests y namas pongo este comentario para no afectar nada xdd */
 
 client.login(process.env.TOKEN);

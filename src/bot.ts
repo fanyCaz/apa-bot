@@ -124,26 +124,26 @@ const emojis=[
   ":film_projector"
 ];
 
-async function listMovieOptions(msg:any){
+function listMovieOptions(msg:any){
   // Creo que esto se llama 'Object destructuring'. Basicamente nos permite "sacar" los valores del set que creamos antes y asi poder leerlos
   const movies=[...set];
-  if(movies.length<=0){
+  if(movies.length==0){
     msg.reply("No hay ninguna película en la lista. Agrega una con !sugerir :slight_smile:");
   } else{
-  const embeded = new Discord.MessageEmbed()
-  .setTitle("Lista de peliculas:")
-  .setDescription(`${movies}`)
-  .setFooter("===============================================================");
-  msg.channel.send(embeded);
+    const embeded = new Discord.MessageEmbed()
+    .setTitle("Lista de peliculas:")
+    .setDescription(`${movies}`)
+    .setFooter("===============================================================");
+    msg.channel.send(embeded);
   }
 }
-async function addMovieOptions(expresion:string,msg:any){
+function addMovieOptions(expresion:string,msg:any){
   var randomEmoji = emojis[Math.floor(Math.random()*emojis.length)];
   set.add(expresion);
   msg.reply(`Se agregó "${expresion}" a la lista! ${randomEmoji}`);
 }
 
-async function randomizeMovieOptions(msg:any){
+function randomizeMovieOptions(msg:any){
   // Creo que esto se llama 'Object destructuring'. Basicamente nos permite "sacar" los valores del set que creamos antes y asi poder leerlos
   const movies=[...set];
   if(movies.length>0){
@@ -159,7 +159,7 @@ async function randomizeMovieOptions(msg:any){
   }
 }
 
-async function deleteMovieOption(nombre:string,msg:any){
+function deleteMovieOption(nombre:string,msg:any){
   if(set.has(nombre)){
     // La pelicula SI existe
     set.delete(nombre);

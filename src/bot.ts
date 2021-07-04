@@ -9,7 +9,7 @@ instance.defaults.timeout = 2500;
 import { getBookInfo } from "./books";
 
 function sendHelpCommands(msg: any){
-  let commands = "ping -> pong! \n !libro -> Dame un ISBN y traeré la referencia APA de ese libro (dependiendo de la información que encuentre) \n !pelicula -> Buscaré información y trailer de la película que me digas, como '!pelicula godzilla' \n !trailer -> Buscaré trailer de la película que me digas como '!trailer twilight' \n Toma en cuenta que estoy chiquito :pensive: y puedo cometer errores medio sonsos :pleading_face:";
+  let commands = "ping -> pong! \n !libro -> Dame un ISBN y traeré la referencia APA de ese libro (dependiendo de la información que encuentre) \n !pelicula -> Buscaré información y trailer de la película que me digas, como '!pelicula godzilla' \n !trailer -> Buscaré trailer de la película que me digas como '!trailer twilight' \n !lista -> Mostraré todas las películas que tengas agregadas para ver después \n !sugerir -> Agregaré la película que escribas a la lista, escríbela como '!sugerir Buscando a Nemo' \n !elegir -> Seleccionaré una película al azar y te diré el nombre \n Toma en cuenta que estoy chiquito :pensive: y puedo cometer errores medio sonsos :pleading_face:";
   const embeded = new Discord.MessageEmbed()
     .setTitle("Comandos disponibles")
     .setDescription(commands)
@@ -106,6 +106,69 @@ async function getMovieInfo(expression: string, msg: any, type_request: string){
   }
 }
 
+/* YO MERO */
+// Set rudimentario para almacenar películas en la sesión del servidor actual (se dice así? lol)
+// Cada vez que se reinicia el server las opciones desaparecen
+const set=new Set();
+const emojis=[
+  ":cow:",
+  ":cowboy:",
+  ":cow2:",
+  ":slight_smile:",
+  ":popcorn:",
+  ":chocolate_bar:",
+  ":candy:",
+  ":movie_camera:",
+  ":film_frames:",
+  ":projector:",
+  ":film_projector"
+];
+
+function listMovieOptions(msg:any){
+  // Creo que esto se llama 'Object destructuring'. Basicamente nos permite "sacar" los valores del set que creamos antes y asi poder leerlos
+  const movies=[...set];
+  if(movies.length==0){
+    msg.reply("No hay ninguna película en la lista. Agrega una con !sugerir :slight_smile:");
+  } else{
+    const embeded = new Discord.MessageEmbed()
+    .setTitle("Lista de peliculas:")
+    .setDescription(`${movies}`)
+    .setFooter("===============================================================");
+    msg.channel.send(embeded);
+  }
+}
+function addMovieOptions(expresion:string,msg:any){
+  var randomEmoji = emojis[Math.floor(Math.random()*emojis.length)];
+  set.add(expresion);
+  msg.reply(`Se agregó "${expresion}" a la lista! ${randomEmoji}`);
+}
+
+function randomizeMovieOptions(msg:any){
+  // Creo que esto se llama 'Object destructuring'. Basicamente nos permite "sacar" los valores del set que creamos antes y asi poder leerlos
+  const movies=[...set];
+  if(movies.length>0){
+  var randomMovie = movies[Math.floor(Math.random()*movies.length)];
+  var randomEmoji = emojis[Math.floor(Math.random()*emojis.length)];
+  const embeded = new Discord.MessageEmbed()
+    .setTitle("The randomizr! :sunglasses:")
+    .setDescription(`La película aleatoria es "${randomMovie}" ${randomEmoji}`)
+    .setFooter("===============================================================");
+    msg.channel.send(embeded);
+  } else{
+    msg.reply("No hay ninguna película en la lista. Agrega una con !sugerir :slight_smile:");
+  }
+}
+
+function deleteMovieOption(nombre:string,msg:any){
+  if(set.has(nombre)){
+    // La pelicula SI existe
+    set.delete(nombre);
+    msg.reply(`'${nombre}' se ha eliminado de la lista.`);
+  } else{
+    msg.reply("La película no se encuentra en la lista.");
+  }
+}
+
 /*DISCORD*/
 const Discord = require('discord.js');
 const client = new Discord.Client();
@@ -155,6 +218,28 @@ client.on('message', (msg: any) =>{
       }else{
         msg.reply("Pasa el nombre de una película :upside_down_face:");
       }
+      break;
+    case '!sugerir':
+      let expresion=args.join(' ');
+      if(expresion.length>1){
+        addMovieOptions(expresion,msg);
+      } else{
+        msg.reply("Debes indicar un nombre válido para añadirlo.");
+      }
+      break;
+    case '!lista':
+        listMovieOptions(msg);
+      break;
+    case '!eliminar':
+      let nombre=args.join(' ');
+      if(nombre.length>1){
+        deleteMovieOption(nombre,msg);
+      } else{
+        msg.reply("Debes indicar un nombre válido para la película que quieres eliminar :upside_down_face:");
+      }
+    break;
+    case '!elegir':
+        randomizeMovieOptions(msg);
       break;
     case '!ayuda':
     case '!help':

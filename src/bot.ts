@@ -6,7 +6,7 @@ const axios = require('axios').default;
 const instance = axios.create();
 instance.defaults.timeout = 2500;
 
-import { getBookInfo } from "./books";
+import { validISBN, getBookInfo } from "./books";
 
 function sendHelpCommands(msg: any){
   let commands = "ping -> pong! \n !libro -> Dame un ISBN y traeré la referencia APA de ese libro (dependiendo de la información que encuentre) \n !pelicula -> Buscaré información y trailer de la película que me digas, como '!pelicula godzilla' \n !trailer -> Buscaré trailer de la película que me digas como '!trailer twilight' \n !lista -> Mostraré todas las películas que tengas agregadas para ver después \n !sugerir -> Agregaré la película que escribas a la lista, escríbela como '!sugerir Buscando a Nemo' \n !elegir -> Seleccionaré una película al azar y te diré el nombre \n Toma en cuenta que estoy chiquito :pensive: y puedo cometer errores medio sonsos :pleading_face:";
@@ -172,6 +172,7 @@ function deleteMovieOption(nombre:string,msg:any){
 /*DISCORD*/
 const Discord = require('discord.js');
 const client = new Discord.Client();
+// guild -> server
 
 client.on('ready', () =>{
   console.log(`logged in ${client.user.tag}`);
@@ -183,22 +184,21 @@ client.on('message', (msg: any) =>{
     return;
   }
   /*LOS COMANDOS DEBEN EMPEZAR CON '!' PARA NO CONFUNDIR CON MSG NORMAL DEL CHAT, O HACER QUE SOLO RESPONDA EN UN CHANNEL ESPECÍFICO*/
-  let args: string[] = message.split(' ');
+  let args: string[] = message.trim().split(/ +/);
   let command = args.shift();
+  
   switch(command){
     case 'ping':
       msg.reply('pong');
       break;
     case '!libro':
-      if(args[0] != null){
+      if(validISBN(args[0])){
         //replace the '-' with no space
         let isbn: string = args[0].replace(/-/gi,'');
-        if(isbn.length == 13 || isbn.length == 10){
-          msg.reply("Dame unos segundos para buscar uwu");
-          getBookInfo(isbn, msg);
-        }else{
-          msg.reply("Pasa un isbn porfavor :upside_down_face:");
-        }
+        msg.reply("Dame unos segundos para buscar uwu");
+        getBookInfo(isbn, msg);
+      }else{
+        msg.reply("Pasa un isbn porfavor :upside_down_face:");
       }
       break;
     case '!pelicula':

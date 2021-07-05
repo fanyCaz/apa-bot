@@ -124,6 +124,27 @@ const emojis=[
   ":film_projector"
 ];
 
+// Crear / verificar existencia del archivo movies.json
+// Originalmente iba a crearse la ruta del archivo uniendo el directorio actual y regresando un nivel
+// pero por alguna razon el fs.sxistsSync no funcionaba de esta manera porque siempre retornaba falso, por lo que se lo anide como string
+// directamente y ahora si me lo evaluaba como debe.
+// var fs=require('fs');
+// const path=require('path');
+const fs=require('fs');
+// const archivo=(__dirname+path.join('../movies.json'));
+const archivo=(__dirname+"/../movies.json");
+console.log(archivo);
+let existe=fs.existsSync(archivo);
+if(!existe){
+  fs.writeFile ("movies.json", JSON.stringify("h"), function(){
+    console.log('Completado');
+  });
+} else{
+  console.log("Si existe");
+}
+
+// (fileExists) ? console.log("El archivo SI existe.") : console.log(fileExists);
+
 function listMovieOptions(msg:any){
   // Creo que esto se llama 'Object destructuring'. Basicamente nos permite "sacar" los valores del set que creamos antes y asi poder leerlos
   const movies=[...set];
@@ -186,7 +207,7 @@ client.on('message', (msg: any) =>{
   let args: string[] = message.split(' ');
   let command = args.shift();
   switch(command){
-    case 'ping':
+    case '!ping':
       msg.reply('pong');
       break;
     case '!libro':

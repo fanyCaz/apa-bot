@@ -107,9 +107,6 @@ async function getMovieInfo(expression: string, msg: any, type_request: string){
 }
 
 /* YO MERO */
-// Set rudimentario para almacenar películas en la sesión del servidor actual (se dice así? lol)
-// Cada vez que se reinicia el server las opciones desaparecen
-const set=new Set();
 const emojis=[
   ":cow:",
   ":cowboy:",
@@ -121,7 +118,7 @@ const emojis=[
   ":movie_camera:",
   ":film_frames:",
   ":projector:",
-  ":film_projector"
+  ":film_projector:"
 ];
 
 // Crear / verificar existencia del archivo movies.json
@@ -132,62 +129,135 @@ const emojis=[
 // const path=require('path');
 const fs=require('fs');
 // const archivo=(__dirname+path.join('../movies.json'));
-const archivo=(__dirname+"/../movies.json");
-console.log(archivo);
-let existe=fs.existsSync(archivo);
-if(!existe){
-  fs.writeFile ("movies.json", JSON.stringify("h"), function(){
-    console.log('Completado');
-  });
-} else{
-  console.log("Si existe");
-}
-
-// (fileExists) ? console.log("El archivo SI existe.") : console.log(fileExists);
-
-function listMovieOptions(msg:any){
-  // Creo que esto se llama 'Object destructuring'. Basicamente nos permite "sacar" los valores del set que creamos antes y asi poder leerlos
-  const movies=[...set];
-  if(movies.length==0){
-    msg.reply("No hay ninguna película en la lista. Agrega una con !sugerir :slight_smile:");
-  } else{
-    const embeded = new Discord.MessageEmbed()
-    .setTitle("Lista de peliculas:")
-    .setDescription(`${movies}`)
-    .setFooter("===============================================================");
-    msg.channel.send(embeded);
+const archivo=(__dirname+"/../movies.json"); // Ruta global para el archivo
+const data={
+  example:{
+    id:1,
+    name:"movie-string",
+    url:"trailer-string"
   }
 }
+console.log("======= WARNING ======= ");
+console.log("Toma en cuenta que se está utilizando Nodemon, el cual reinicia el servidor cada vez que hay cambios en los archivos.\n POR LO TANTO cada vez que sugieras una película, ésta se agregará al archivo 'movies.json' y guardará los cambios, lo que ocasionará que NODEMON actúe.");
+console.log(archivo);
+// Revisa si el archivo existe o no
+let existe=fs.existsSync(archivo);
+if(!existe){ // Si no existe se crea
+  // Se indica el nombre del archivo y enviamos un ejemplo de como debería almacenarse cada entrada
+  fs.writeFile ("movies.json", JSON.stringify(data), function(){
+    console.log('Completado');
+    return;
+  });
+}
+// (fileExists) ? console.log("El archivo SI existe.") : console.log(fileExists);
+
+// Usamos este set como apoyo al extraer datos de los JSON
+const set=new Set();
+
+function listMovieOptions(msg:any){
+  /* 06/07/2021 */
+  /* Mood del día: Donkey Kong Country 2 Soundtrack */
+  // fs.readFile pues, lee el archivo con el path que indicamos
+  fs.readFile(archivo, 'utf8', function readFileCallback(err:any, data:any){
+    if(err){
+        console.log(err);
+    } else{
+      // Hagamos un breakdown
+      // Se parsean los datos del archivo 'movies.json' donde se almacenan las peliculas
+      const moviesJson:any = JSON.parse(data); // El JSON ahora es un objeto
+      // Se cicla para obtener el nombre de cada llave existente y almacenarla en el set con el que mostraremos los titulos al cliente
+      for(let key in moviesJson) {
+          set.add(key);
+      }
+      // Creo que esto se llama 'Object destructuring'. Basicamente nos permite "sacar" los valores del set que creamos antes y asi poder leerlos
+      const movies=[...set];
+      if(movies.length==0){
+        msg.reply("No hay ninguna película en la lista. Agrega una con !sugerir :slight_smile:");
+      } else{
+        const embeded = new Discord.MessageEmbed()
+        .setTitle("Lista de peliculas:")
+        .setDescription(`${movies}`)
+        .setFooter("===============================================================");
+        msg.channel.send(embeded);
+      }
+    }
+  });
+}
+
 function addMovieOptions(expresion:string,msg:any){
   var randomEmoji = emojis[Math.floor(Math.random()*emojis.length)];
-  set.add(expresion);
-  msg.reply(`Se agregó "${expresion}" a la lista! ${randomEmoji}`);
+  fs.readFile(archivo, 'utf8', function readFileCallback(err:any, data:any){
+    if (err){
+        console.log(err);
+    } else {
+      // Parsing
+      let moviesJson:any = [JSON.parse(data)];
+      // To string
+      let moviesString:string = JSON.stringify(moviesJson);
+      // Eliminar [] and {} para hacer push de la nueva pelicula
+      moviesString=(moviesString.replace('[{','').replace('}]',''));
+      moviesJson=[moviesString];
+      moviesJson.push(`"${expresion}":{"id":2,"url":"Una URL"}`);
+      moviesString=("{"+moviesJson+"}");
+      // Escribir en el archivo la nueva informacion
+      fs.writeFile(archivo, moviesString, function(err:any){
+        console.log(err);
+        msg.reply(`Se agregó "${expresion}" a la lista! ${randomEmoji}`);
+      });
+  }});
 }
 
 function randomizeMovieOptions(msg:any){
-  // Creo que esto se llama 'Object destructuring'. Basicamente nos permite "sacar" los valores del set que creamos antes y asi poder leerlos
-  const movies=[...set];
-  if(movies.length>0){
-  var randomMovie = movies[Math.floor(Math.random()*movies.length)];
-  var randomEmoji = emojis[Math.floor(Math.random()*emojis.length)];
-  const embeded = new Discord.MessageEmbed()
-    .setTitle("The randomizr! :sunglasses:")
-    .setDescription(`La película aleatoria es "${randomMovie}" ${randomEmoji}`)
-    .setFooter("===============================================================");
-    msg.channel.send(embeded);
-  } else{
-    msg.reply("No hay ninguna película en la lista. Agrega una con !sugerir :slight_smile:");
-  }
+  fs.readFile(archivo, 'utf8', function readFileCallback(err:any, data:any){
+    if(err){
+        console.log(err);
+    } else{
+      const moviesJson:any = JSON.parse(data);
+      for(let key in moviesJson) {
+          set.add(key);
+      }
+      const movies=[...set];
+      if(movies.length==0){
+        msg.reply("No hay ninguna película en la lista. Agrega una con !sugerir :slight_smile:");
+      } else{
+        let randomMovie = movies[Math.floor(Math.random()*movies.length)];
+        let randomEmoji = emojis[Math.floor(Math.random()*emojis.length)];
+        const embeded = new Discord.MessageEmbed()
+          .setTitle("The randomizr! :sunglasses:")
+          .setDescription(`La película aleatoria es "${randomMovie}" ${randomEmoji}`)
+          .setFooter("===============================================================");
+          msg.channel.send(embeded);
+      }
+    }
+  });
 }
 
 function deleteMovieOption(nombre:string,msg:any){
-  if(set.has(nombre)){
-    // La pelicula SI existe
-    set.delete(nombre);
-    msg.reply(`'${nombre}' se ha eliminado de la lista.`);
-  } else{
-    msg.reply("La película no se encuentra en la lista.");
-  }
+  fs.readFile(archivo, 'utf8', function readFileCallback(err:any, data:any){
+    if(err){
+        console.log(err);
+    } else{
+      let moviesJson:any = JSON.parse(data);
+      for(let key in moviesJson) {
+          set.add(key);
+      }
+
+      if(set.has(nombre)){ // La pelicula SI existe en el set
+        set.delete(nombre);
+        delete moviesJson[nombre]; // Eliminar del set y del arreglo
+        var json = JSON.stringify([moviesJson]);
+        json=(json.replace('[','').replace(']',''));
+
+        // Escribir en el archivo la nueva informacion
+        fs.writeFile(archivo, json, function(err:any){
+          console.log(err);
+          msg.reply(`Se eliminó "${nombre}" de la lista! :heavy_multiplication_x:`);
+        });
+      } else{
+        msg.reply("La película no se encuentra en la lista.");
+      }
+    }
+  });
 }
 
 /*DISCORD*/

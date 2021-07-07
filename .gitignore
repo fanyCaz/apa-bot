@@ -1,6 +1,8 @@
 # Node Modules
 node_modules/
 
+movies.json
+
 #Javascript
 dist/
 

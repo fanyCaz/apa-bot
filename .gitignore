@@ -2,6 +2,7 @@
 node_modules/
 
 movies.json
+yarn.lock
 
 #Javascript
 dist/

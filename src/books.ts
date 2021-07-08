@@ -2,7 +2,7 @@
 
 const axios = require('axios').default;
 const apaAxios = axios.create();
-apaAxios.defaults.timeout = 2500;
+apaAxios.defaults.timeout = 3500;
 
 const open_library_URL = "https://openlibrary.org/";
 
@@ -51,4 +51,14 @@ async function getBookInfo(isbn: string, msg: any){
   }
 }
 
-export { getBookInfo } 
+function validISBN(argument: string): boolean {
+  if(argument){
+    let arg: string = argument.replace(/-/gi,'');
+    if(arg.length == 10 || arg.length == 13){
+      return true;
+    }
+  }
+  return false;
+}
+
+export { validISBN, getBookInfo } 

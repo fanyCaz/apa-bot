@@ -106,7 +106,6 @@ async function getMovieInfo(expression: string, msg: any, type_request: string){
   }
 }
 
-/* YO MERO */
 const emojis=[
   ":cow:",
   ":cowboy:",
@@ -121,62 +120,40 @@ const emojis=[
   ":film_projector:"
 ];
 
-// Crear / verificar existencia del archivo movies.json
-// Originalmente iba a crearse la ruta del archivo uniendo el directorio actual y regresando un nivel
-// pero por alguna razon el fs.sxistsSync no funcionaba de esta manera porque siempre retornaba falso, por lo que se lo anide como string
-// directamente y ahora si me lo evaluaba como debe.
-// var fs=require('fs');
-// const path=require('path');
 const fs=require('fs');
-// const archivo=(__dirname+path.join('../movies.json'));
 const archivo=(__dirname+"/../movies.json"); // Ruta global para el archivo
 const data={
   example:{
     id:1,
-    name:"movie-string",
     url:"trailer-string"
   }
 }
 console.log("======= WARNING ======= ");
-console.log("Toma en cuenta que se está utilizando Nodemon, el cual reinicia el servidor cada vez que hay cambios en los archivos.\n POR LO TANTO cada vez que sugieras una película, ésta se agregará al archivo 'movies.json' y guardará los cambios, lo que ocasionará que NODEMON actúe.");
-console.log(archivo);
-// Revisa si el archivo existe o no
+console.log("Toma en cuenta que se está utilizando Nodemon, el cual refresca el servidor cada vez que hay cambios en los archivos.\n POR LO TANTO cada vez que sugieras o elimines una película, se guardarán los cambios en 'movies.json', lo que ocasionará que NODEMON actúe.");
+
 let existe=fs.existsSync(archivo);
-if(!existe){ // Si no existe se crea
-  // Se indica el nombre del archivo y enviamos un ejemplo de como debería almacenarse cada entrada
+if(!existe){
+  // Indicar nombre y ejemplo de formato
   fs.writeFile ("movies.json", JSON.stringify(data), function(){
     console.log('Completado');
     return;
   });
 }
-// (fileExists) ? console.log("El archivo SI existe.") : console.log(fileExists);
-
-// Usamos este set como apoyo al extraer datos de los JSON
-const set=new Set();
 
 function listMovieOptions(msg:any){
   /* 06/07/2021 */
   /* Mood del día: Donkey Kong Country 2 Soundtrack */
-  // fs.readFile pues, lee el archivo con el path que indicamos
   fs.readFile(archivo, 'utf8', function readFileCallback(err:any, data:any){
     if(err){
-        console.log(err);
+      msg.reply("Oh oh, parece que hubo un problema :confounded:");
     } else{
-      // Hagamos un breakdown
-      // Se parsean los datos del archivo 'movies.json' donde se almacenan las peliculas
-      const moviesJson:any = JSON.parse(data); // El JSON ahora es un objeto
-      // Se cicla para obtener el nombre de cada llave existente y almacenarla en el set con el que mostraremos los titulos al cliente
-      for(let key in moviesJson) {
-          set.add(key);
-      }
-      // Creo que esto se llama 'Object destructuring'. Basicamente nos permite "sacar" los valores del set que creamos antes y asi poder leerlos
-      const movies=[...set];
-      if(movies.length==0){
-        msg.reply("No hay ninguna película en la lista. Agrega una con !sugerir :slight_smile:");
+      const moviesJsonKeys:any = Object.keys(JSON.parse(data));
+      if(moviesJsonKeys.length==0){
+        msg.reply("No hay ninguna película en la lista. Agrega una con '!sugerir' :slight_smile:");
       } else{
         const embeded = new Discord.MessageEmbed()
         .setTitle("Lista de peliculas:")
-        .setDescription(`${movies}`)
+        .setDescription(`${moviesJsonKeys}`)
         .setFooter("===============================================================");
         msg.channel.send(embeded);
       }
@@ -184,77 +161,77 @@ function listMovieOptions(msg:any){
   });
 }
 
-function addMovieOptions(expresion:string,msg:any){
-  var randomEmoji = emojis[Math.floor(Math.random()*emojis.length)];
+function addMovieOptions(nombrePelicula:string,msg:any){
+  let randomEmoji = emojis[Math.floor(Math.random()*emojis.length)];
   fs.readFile(archivo, 'utf8', function readFileCallback(err:any, data:any){
     if (err){
-        console.log(err);
+      msg.reply("Oh oh, parece que hubo un problema :confounded:");
+      console.log(err);
     } else {
-      // Parsing
-      let moviesJson:any = [JSON.parse(data)];
-      // To string
-      let moviesString:string = JSON.stringify(moviesJson);
-      // Eliminar [] and {} para hacer push de la nueva pelicula
-      moviesString=(moviesString.replace('[{','').replace('}]',''));
-      moviesJson=[moviesString];
-      moviesJson.push(`"${expresion}":{"id":2,"url":"Una URL"}`);
-      moviesString=("{"+moviesJson+"}");
-      // Escribir en el archivo la nueva informacion
-      fs.writeFile(archivo, moviesString, function(err:any){
-        console.log(err);
-        msg.reply(`Se agregó "${expresion}" a la lista! ${randomEmoji}`);
-      });
+      const moviesJsonKeys:any = Object.keys(JSON.parse(data));
+      const jsonData:any = JSON.parse(data);
+      if(jsonData.hasOwnProperty(nombrePelicula)){
+        msg.reply(`La película '${nombrePelicula}' ya existe en la lista :slight_smile:`);
+      } else{
+        let moviesJson:any = JSON.stringify([JSON.parse(data)]);
+        // Eliminar [] and {} para concatenar la nueva pelicula
+        moviesJson=(moviesJson.replace('[{','').replace('}]',''));
+        (moviesJsonKeys.length==0) ? moviesJson=("{"+`"${nombrePelicula}":{"id":2,"url":"Una URL"}`+"}") : moviesJson=("{"+moviesJson+`,"${nombrePelicula}":{"id":2,"url":"Una URL"}`+"}");
+        fs.writeFile(archivo, moviesJson, function(err:any){
+          if(err){
+            console.log(err);
+            msg.reply("Oh oh, parece que hubo un problema :confounded:");
+          } else{
+            msg.reply(`Se agregó '${nombrePelicula}' a la lista! ${randomEmoji}`);
+          }
+        });
+      }
   }});
 }
 
 function randomizeMovieOptions(msg:any){
   fs.readFile(archivo, 'utf8', function readFileCallback(err:any, data:any){
     if(err){
-        console.log(err);
+      msg.reply("Oh oh, parece que hubo un problema :confounded:");
+      console.log(err);
     } else{
-      const moviesJson:any = JSON.parse(data);
-      for(let key in moviesJson) {
-          set.add(key);
-      }
-      const movies=[...set];
-      if(movies.length==0){
-        msg.reply("No hay ninguna película en la lista. Agrega una con !sugerir :slight_smile:");
+      const moviesJsonKeys:any = Object.keys(JSON.parse(data));
+      if(moviesJsonKeys.length==0){
+        msg.reply("No hay ninguna película en la lista. Agrega una con '!sugerir' :slight_smile:");
       } else{
-        let randomMovie = movies[Math.floor(Math.random()*movies.length)];
+        let randomMovie = moviesJsonKeys[Math.floor(Math.random()*moviesJsonKeys.length)];
         let randomEmoji = emojis[Math.floor(Math.random()*emojis.length)];
         const embeded = new Discord.MessageEmbed()
           .setTitle("The randomizr! :sunglasses:")
-          .setDescription(`La película aleatoria es "${randomMovie}" ${randomEmoji}`)
-          .setFooter("===============================================================");
+          .setDescription(`La película aleatoria es '${randomMovie}' ${randomEmoji}`)
+          .setFooter("====~(8:>====~(8:>====~(8:>====~(8:>====~(8:>====~(8:>====~(8:>====");
           msg.channel.send(embeded);
       }
     }
   });
 }
 
-function deleteMovieOption(nombre:string,msg:any){
+function deleteMovieOption(nombrePelicula:string,msg:any){
   fs.readFile(archivo, 'utf8', function readFileCallback(err:any, data:any){
     if(err){
-        console.log(err);
+      msg.reply("Oh oh, parece que hubo un problema :confounded:");
+      console.log(err);
     } else{
-      let moviesJson:any = JSON.parse(data);
-      for(let key in moviesJson) {
-          set.add(key);
-      }
-
-      if(set.has(nombre)){ // La pelicula SI existe en el set
-        set.delete(nombre);
-        delete moviesJson[nombre]; // Eliminar del set y del arreglo
+      const moviesJson:any = JSON.parse(data);
+      if(moviesJson.hasOwnProperty(nombrePelicula)){
+        delete moviesJson[nombrePelicula]; // Eliminar del objeto
         var json = JSON.stringify([moviesJson]);
         json=(json.replace('[','').replace(']',''));
-
-        // Escribir en el archivo la nueva informacion
         fs.writeFile(archivo, json, function(err:any){
-          console.log(err);
-          msg.reply(`Se eliminó "${nombre}" de la lista! :heavy_multiplication_x:`);
+          if(err){
+            msg.reply("Oh oh, parece que hubo un problema :confounded:");
+            console.log(err);
+          } else{
+            msg.reply(`Se eliminó '${nombrePelicula}' de la lista! :heavy_multiplication_x:`);
+          }
         });
       } else{
-        msg.reply("La película no se encuentra en la lista.");
+        msg.reply(`La película '${nombrePelicula}' no se encuentra en la lista :confused:`);
       }
     }
   });
@@ -311,9 +288,9 @@ client.on('message', (msg: any) =>{
       }
       break;
     case '!sugerir':
-      let expresion=args.join(' ');
-      if(expresion.length>1){
-        addMovieOptions(expresion,msg);
+      var nombrePelicula=args.join(' ');
+      if(nombrePelicula.length>1){
+        addMovieOptions(nombrePelicula,msg);
       } else{
         msg.reply("Debes indicar un nombre válido para añadirlo.");
       }
@@ -322,9 +299,9 @@ client.on('message', (msg: any) =>{
         listMovieOptions(msg);
       break;
     case '!eliminar':
-      let nombre=args.join(' ');
-      if(nombre.length>1){
-        deleteMovieOption(nombre,msg);
+      var nombrePelicula=args.join(' ');
+      if(nombrePelicula.length>1){
+        deleteMovieOption(nombrePelicula,msg);
       } else{
         msg.reply("Debes indicar un nombre válido para la película que quieres eliminar :upside_down_face:");
       }

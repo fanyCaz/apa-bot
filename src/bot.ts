@@ -106,10 +106,6 @@ async function getMovieInfo(expression: string, msg: any, type_request: string){
   }
 }
 
-/* YO MERO */
-// Set rudimentario para almacenar películas en la sesión del servidor actual (se dice así? lol)
-// Cada vez que se reinicia el server las opciones desaparecen
-const set=new Set();
 const emojis=[
   ":cow:",
   ":cowboy:",
@@ -121,52 +117,124 @@ const emojis=[
   ":movie_camera:",
   ":film_frames:",
   ":projector:",
-  ":film_projector"
+  ":film_projector:"
 ];
 
-function listMovieOptions(msg:any){
-  // Creo que esto se llama 'Object destructuring'. Basicamente nos permite "sacar" los valores del set que creamos antes y asi poder leerlos
-  const movies=[...set];
-  if(movies.length==0){
-    msg.reply("No hay ninguna película en la lista. Agrega una con !sugerir :slight_smile:");
-  } else{
-    const embeded = new Discord.MessageEmbed()
-    .setTitle("Lista de peliculas:")
-    .setDescription(`${movies}`)
-    .setFooter("===============================================================");
-    msg.channel.send(embeded);
+const fs=require('fs');
+const archivo=(__dirname+"/../movies.json"); // Ruta global para el archivo
+const data={
+  example:{
+    id:1,
+    url:"trailer-string"
   }
 }
-function addMovieOptions(expresion:string,msg:any){
-  var randomEmoji = emojis[Math.floor(Math.random()*emojis.length)];
-  set.add(expresion);
-  msg.reply(`Se agregó "${expresion}" a la lista! ${randomEmoji}`);
+console.log("======= WARNING ======= ");
+console.log("Toma en cuenta que se está utilizando Nodemon, el cual refresca el servidor cada vez que hay cambios en los archivos.\n POR LO TANTO cada vez que sugieras o elimines una película, se guardarán los cambios en 'movies.json', lo que ocasionará que NODEMON actúe.");
+
+let existe=fs.existsSync(archivo);
+if(!existe){
+  // Indicar nombre y ejemplo de formato
+  fs.writeFile ("movies.json", JSON.stringify(data), function(){
+    console.log('Completado');
+    return;
+  });
+}
+
+function listMovieOptions(msg:any){
+  /* 06/07/2021 */
+  /* Mood del día: Donkey Kong Country 2 Soundtrack */
+  fs.readFile(archivo, 'utf8', function readFileCallback(err:any, data:any){
+    if(err){
+      msg.reply("Oh oh, parece que hubo un problema :confounded:");
+    } else{
+      const moviesJsonKeys:any = Object.keys(JSON.parse(data));
+      if(moviesJsonKeys.length==0){
+        msg.reply("No hay ninguna película en la lista. Agrega una con '!sugerir' :slight_smile:");
+      } else{
+        const embeded = new Discord.MessageEmbed()
+        .setTitle("Lista de peliculas:")
+        .setDescription(`${moviesJsonKeys}`)
+        .setFooter("===============================================================");
+        msg.channel.send(embeded);
+      }
+    }
+  });
+}
+
+function addMovieOptions(nombrePelicula:string,msg:any){
+  let randomEmoji = emojis[Math.floor(Math.random()*emojis.length)];
+  fs.readFile(archivo, 'utf8', function readFileCallback(err:any, data:any){
+    if (err){
+      msg.reply("Oh oh, parece que hubo un problema :confounded:");
+      console.log(err);
+    } else {
+      const moviesJsonKeys:any = Object.keys(JSON.parse(data));
+      const jsonData:any = JSON.parse(data);
+      if(jsonData.hasOwnProperty(nombrePelicula)){
+        msg.reply(`La película '${nombrePelicula}' ya existe en la lista :slight_smile:`);
+      } else{
+        let moviesJson:any = JSON.stringify([JSON.parse(data)]);
+        // Eliminar [] and {} para concatenar la nueva pelicula
+        moviesJson=(moviesJson.replace('[{','').replace('}]',''));
+        (moviesJsonKeys.length==0) ? moviesJson=("{"+`"${nombrePelicula}":{"id":2,"url":"Una URL"}`+"}") : moviesJson=("{"+moviesJson+`,"${nombrePelicula}":{"id":2,"url":"Una URL"}`+"}");
+        fs.writeFile(archivo, moviesJson, function(err:any){
+          if(err){
+            console.log(err);
+            msg.reply("Oh oh, parece que hubo un problema :confounded:");
+          } else{
+            msg.reply(`Se agregó '${nombrePelicula}' a la lista! ${randomEmoji}`);
+          }
+        });
+      }
+  }});
 }
 
 function randomizeMovieOptions(msg:any){
-  // Creo que esto se llama 'Object destructuring'. Basicamente nos permite "sacar" los valores del set que creamos antes y asi poder leerlos
-  const movies=[...set];
-  if(movies.length>0){
-  var randomMovie = movies[Math.floor(Math.random()*movies.length)];
-  var randomEmoji = emojis[Math.floor(Math.random()*emojis.length)];
-  const embeded = new Discord.MessageEmbed()
-    .setTitle("The randomizr! :sunglasses:")
-    .setDescription(`La película aleatoria es "${randomMovie}" ${randomEmoji}`)
-    .setFooter("===============================================================");
-    msg.channel.send(embeded);
-  } else{
-    msg.reply("No hay ninguna película en la lista. Agrega una con !sugerir :slight_smile:");
-  }
+  fs.readFile(archivo, 'utf8', function readFileCallback(err:any, data:any){
+    if(err){
+      msg.reply("Oh oh, parece que hubo un problema :confounded:");
+      console.log(err);
+    } else{
+      const moviesJsonKeys:any = Object.keys(JSON.parse(data));
+      if(moviesJsonKeys.length==0){
+        msg.reply("No hay ninguna película en la lista. Agrega una con '!sugerir' :slight_smile:");
+      } else{
+        let randomMovie = moviesJsonKeys[Math.floor(Math.random()*moviesJsonKeys.length)];
+        let randomEmoji = emojis[Math.floor(Math.random()*emojis.length)];
+        const embeded = new Discord.MessageEmbed()
+          .setTitle("The randomizr! :sunglasses:")
+          .setDescription(`La película aleatoria es '${randomMovie}' ${randomEmoji}`)
+          .setFooter("====~(8:>====~(8:>====~(8:>====~(8:>====~(8:>====~(8:>====~(8:>====");
+          msg.channel.send(embeded);
+      }
+    }
+  });
 }
 
-function deleteMovieOption(nombre:string,msg:any){
-  if(set.has(nombre)){
-    // La pelicula SI existe
-    set.delete(nombre);
-    msg.reply(`'${nombre}' se ha eliminado de la lista.`);
-  } else{
-    msg.reply("La película no se encuentra en la lista.");
-  }
+function deleteMovieOption(nombrePelicula:string,msg:any){
+  fs.readFile(archivo, 'utf8', function readFileCallback(err:any, data:any){
+    if(err){
+      msg.reply("Oh oh, parece que hubo un problema :confounded:");
+      console.log(err);
+    } else{
+      const moviesJson:any = JSON.parse(data);
+      if(moviesJson.hasOwnProperty(nombrePelicula)){
+        delete moviesJson[nombrePelicula]; // Eliminar del objeto
+        var json = JSON.stringify([moviesJson]);
+        json=(json.replace('[','').replace(']',''));
+        fs.writeFile(archivo, json, function(err:any){
+          if(err){
+            msg.reply("Oh oh, parece que hubo un problema :confounded:");
+            console.log(err);
+          } else{
+            msg.reply(`Se eliminó '${nombrePelicula}' de la lista! :heavy_multiplication_x:`);
+          }
+        });
+      } else{
+        msg.reply(`La película '${nombrePelicula}' no se encuentra en la lista :confused:`);
+      }
+    }
+  });
 }
 
 /*DISCORD*/
@@ -188,7 +256,7 @@ client.on('message', (msg: any) =>{
   let command = args.shift();
   
   switch(command){
-    case 'ping':
+    case '!ping':
       msg.reply('pong');
       break;
     case '!libro':
@@ -220,9 +288,9 @@ client.on('message', (msg: any) =>{
       }
       break;
     case '!sugerir':
-      let expresion=args.join(' ');
-      if(expresion.length>1){
-        addMovieOptions(expresion,msg);
+      var nombrePelicula=args.join(' ');
+      if(nombrePelicula.length>1){
+        addMovieOptions(nombrePelicula,msg);
       } else{
         msg.reply("Debes indicar un nombre válido para añadirlo.");
       }
@@ -231,9 +299,9 @@ client.on('message', (msg: any) =>{
         listMovieOptions(msg);
       break;
     case '!eliminar':
-      let nombre=args.join(' ');
-      if(nombre.length>1){
-        deleteMovieOption(nombre,msg);
+      var nombrePelicula=args.join(' ');
+      if(nombrePelicula.length>1){
+        deleteMovieOption(nombrePelicula,msg);
       } else{
         msg.reply("Debes indicar un nombre válido para la película que quieres eliminar :upside_down_face:");
       }

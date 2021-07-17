@@ -265,7 +265,7 @@ function deleteMovieOption(nombrePelicula:string,msg:any){
 /*DISCORD*/
 const Discord = require('discord.js');
 const client = new Discord.Client();
-// guild -> server
+// guild means -> server
 
 client.on('ready', () =>{
   console.log(`logged in ${client.user.tag}`);

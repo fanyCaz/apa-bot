@@ -7,10 +7,16 @@ const instance = axios.create();
 instance.defaults.timeout = 2500;
 
 import { validISBN, getBookInfo } from "./books";
-import { searchMovie, searchTrailer } from "./movies";
+import { searchMovie } from "./movies";
 
 function sendHelpCommands(msg: any){
-  let commands = "ping -> pong! \n !libro -> Dame un ISBN y traeré la referencia APA de ese libro (dependiendo de la información que encuentre) \n !pelicula -> Buscaré información y trailer de la película que me digas, como '!pelicula godzilla' \n !trailer -> Buscaré trailer de la película que me digas como '!trailer twilight' \n !lista -> Mostraré todas las películas que tengas agregadas para ver después \n !sugerir -> Agregaré la película que escribas a la lista, escríbela como '!sugerir Buscando a Nemo' \n !elegir -> Seleccionaré una película al azar y te diré el nombre \n Toma en cuenta que estoy chiquito :pensive: y puedo cometer errores medio sonsos :pleading_face:";
+  let commands = "ping -> pong! \n " +
+    "!libro -> Dame un ISBN y traeré la referencia APA de ese libro (dependiendo de la información que encuentre) \n" +
+    "!pelicula -> Buscaré información y trailer de la película que me digas, como '!pelicula godzilla' \n" +
+    "!lista -> Mostraré todas las películas que tengas agregadas para ver después \n" +
+    "!sugerir -> Agregaré la película que escribas a la lista, escríbela como '!sugerir Buscando a Nemo' \n" +
+    "!elegir -> Seleccionaré una película al azar y te diré el nombre \n" +
+    "Toma en cuenta que estoy chiquito :pensive: y puedo cometer errores medio sonsos :pleading_face:";
   const embeded = new Discord.MessageEmbed()
     .setTitle("Comandos disponibles")
     .setDescription(commands)
@@ -223,13 +229,14 @@ client.on('message', (msg: any) =>{
       }
       break;
     case '!trailer':
-      if(isValidArgument(args)){
+      /*if(isValidArgument(args)){
         let expression = args.join(' ');
         msg.reply("Dame unos segundos para buscar uwu");
-        searchTrailer(expression, msg);
+        //searchTrailer(expression, msg);
       }else{
         msg.reply("Pasa el nombre de una película :upside_down_face:");
-      }
+      }*/
+      msg.reply("Estoy en manteniemto :tools:");
       break;
     case '!sugerir':
       if(isValidArgument(args)){

@@ -57,25 +57,56 @@ async function getCoincidence(movie_query: string){
   return response;
 }
 
-async function searchMovie(movie_query: string, msg: any){
+async function findMovieId(movie_query: string, msg: any){
   let movie_id = "";
 
   let matching_coincidence = await getCoincidence(movie_query);
   if(!isValidResponse(matching_coincidence)){
     printError(matching_coincidence);
     msg.reply("No se ha encontrado :confused:");
-    return;
+    return '';
   }
 
   movie_id = matching_coincidence.data.results[0].id;
-
-  let title_info: any = await getTitleInfo(movie_id);
-  if(!isValidResponse(title_info)){
-    printError(title_info);
-    msg.reply("Ha ocurrido un error al buscarlo :skull:");
-    return;
-  }
-  sendMovieInfo(title_info.data, msg);
+  return movie_id;
 }
 
-export { searchMovie  }
+async function replyWithMovieInformation(movie_id: string, msg: any){
+  let title_info: any = await getTitleInfo(movie_id);
+  if(isValidResponse(title_info)){
+    sendMovieInfo(title_info.data, msg);
+  }else{
+    printError(title_info);
+    msg.reply("Ha ocurrido un error al buscarlo :skull:");
+  }
+}
+
+async function searchMovie(movie_query: string, msg: any){
+  let movie_id: string = await findMovieId(movie_query, msg);
+  replyWithMovieInformation(movie_id, msg);
+}
+
+async function getTrailerInfo(movie_id: string){
+  let response: any = await apaAxios.get(imdb_URL + 'Trailer/', {
+    params: {
+      apiKey: process.env.API_KEY,
+      id: movie_id
+    }
+  }).then(function(res: any){
+    return res;
+  }).catch(function(error: any){
+    return error;
+  });
+
+  return response;
+}
+
+async function searchTrailer(movie_query: string, msg: any){
+  let movie_id: string = await findMovieId(movie_query, msg);
+  await getTrailerInfo(movie_id);
+  //
+  msg.reply("I cant help myself :tools:");
+  //sendTrailerInfo();
+}
+
+export { searchMovie, searchTrailer  }

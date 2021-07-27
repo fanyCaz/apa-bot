@@ -7,7 +7,7 @@ const instance = axios.create();
 instance.defaults.timeout = 2500;
 
 import { validISBN, getBookInfo } from "./books";
-import { searchMovie } from "./movies";
+import { searchMovie, searchTrailer } from "./movies";
 
 function sendHelpCommands(msg: any){
   let commands = "ping -> pong! \n " +
@@ -229,14 +229,13 @@ client.on('message', (msg: any) =>{
       }
       break;
     case '!trailer':
-      /*if(isValidArgument(args)){
+      if(isValidArgument(args)){
         let expression = args.join(' ');
         msg.reply("Dame unos segundos para buscar uwu");
-        //searchTrailer(expression, msg);
+        searchTrailer(expression, msg);
       }else{
         msg.reply("Pasa el nombre de una película :upside_down_face:");
-      }*/
-      msg.reply("Estoy en manteniemto :tools:");
+      }
       break;
     case '!sugerir':
       if(isValidArgument(args)){

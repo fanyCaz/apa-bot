@@ -42,6 +42,15 @@ async function sendMovieInfo(title_info: any, msg: any){
   msg.channel.send(embeded);
 }
 
+function sendTrailerInfo(trailer_info: any, msg: any){
+  let description: string = (trailer_info.linkEmbed) ? `Si no te funciona el título, puedes usar este: ${trailer_info.linkEmbed}` : '' ;
+  const embeded = new Discord.MessageEmbed()
+    .setTitle(`Trailer: ${trailer_info.fullTitle}`)
+    .setDescription(description)
+    .setURL(trailer_info.link);
+  msg.channel.send(embeded);
+}
+
 async function getCoincidence(movie_query: string){
   let response: any = await axios.get(imdb_URL + 'SearchMovie/',{
     params: {
@@ -81,9 +90,20 @@ async function replyWithMovieInformation(movie_id: string, msg: any){
   }
 }
 
+async function replyWithTrailerInformation(movie_id: string, msg: any){
+  let trailer_info: any = await getTrailerInfo(movie_id);
+  if(isValidResponse(trailer_info)){
+    sendTrailerInfo(trailer_info.data, msg);
+  }else{
+    printError(trailer_info);
+    msg.reply("Ha ocurrido un error al buscarlo :skull:");
+  }
+}
+
 async function searchMovie(movie_query: string, msg: any){
   let movie_id: string = await findMovieId(movie_query, msg);
   replyWithMovieInformation(movie_id, msg);
+  replyWithTrailerInformation(movie_id, msg);
 }
 
 async function getTrailerInfo(movie_id: string){
@@ -103,10 +123,7 @@ async function getTrailerInfo(movie_id: string){
 
 async function searchTrailer(movie_query: string, msg: any){
   let movie_id: string = await findMovieId(movie_query, msg);
-  await getTrailerInfo(movie_id);
-  //
-  msg.reply("I cant help myself :tools:");
-  //sendTrailerInfo();
+  replyWithTrailerInformation(movie_id, msg);
 }
 
-export { searchMovie, searchTrailer  }
+export { searchMovie, searchTrailer }

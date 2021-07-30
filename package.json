@@ -3,10 +3,15 @@
     "version": "1.0.0",
     "description": "Bot that gets the APA reference of any book ... as long as it is available in this page: https://openlibrary.org/developers/api. Now I want to include movies too... as long as they're available in this page: https://imdb-api.com/api",
     "main": "index.js",
+    "engines": {
+      "node": "14.x",
+      "npm": "*"
+    },
     "scripts": {
         "watch": "tsc -w",
         "dev": "nodemon dist/bot.js",
-        "start": "concurrently \"yarn dev\" \"yarn watch\" "
+        "development": "concurrently \"yarn dev\" \"yarn watch\" ",
+        "start": "node dist/bot.js"
     },
     "repository": {
         "type": "git",

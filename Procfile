@@ -1,1 +1,2 @@
-worker: npm start
+worker: yarn watch
+worker: yarn start

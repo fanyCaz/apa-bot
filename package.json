@@ -6,7 +6,8 @@
     "scripts": {
         "watch": "tsc -w",
         "dev": "nodemon dist/bot.js",
-        "start": "concurrently \"yarn dev\" \"yarn watch\" "
+        "development": "concurrently \"yarn dev\" \"yarn watch\" ",
+        "start": "node dist/bot.js"
     },
     "repository": {
         "type": "git",

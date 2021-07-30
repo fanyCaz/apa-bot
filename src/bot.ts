@@ -67,6 +67,9 @@ client.on('message', (msg: any) =>{
     case '!ping':
       msg.reply('pong');
       break;
+    case '!mina':
+      msg.reply('ya dejame ir con el gatooooo');
+      break;
     case '!libro':
       if(validISBN(args[0])){
         //replace the '-' with no space

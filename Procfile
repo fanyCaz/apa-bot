@@ -1,2 +1,1 @@
-worker: yarn watch
-worker: yarn start
+worker: yarn prod

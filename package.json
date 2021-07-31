@@ -8,11 +8,7 @@
       "npm": "*"
     },
     "scripts": {
-        "watch": "tsc -w",
-        "dev": "nodemon dist/bot.js",
-        "development": "concurrently \"yarn dev\" \"yarn watch\" ",
-        "start": "node dist/bot.js",
-        "prod": "concurrently \"yarn watch\" \"yarn start\""
+        "start": "node dist/bot.js"
     },
     "repository": {
         "type": "git",

@@ -2,16 +2,6 @@
 
 const Discord = require('discord.js');
 
-function isValidResponse(response: any): boolean{
-  let isValid = (response.status == 200 && response.data);
-  return isValid;
-}
-
-function printError(response: any){
-  console.log(response.status);
-  console.log(response);
-}
-
 const movieSet = new Set();
 
 function addMovie(expresion: string, msg: any){

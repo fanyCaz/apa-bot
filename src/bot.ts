@@ -101,32 +101,30 @@ client.on('message', (msg: any) =>{
         msg.reply("Pasa el nombre de una película :upside_down_face:");
       }
       break;
-
     /*** RANDOMIZER ***/
     case '!sugerir':
-        if(isValidArgument(args)) {
-            expresion = args.join(' ');
-            addMovie(expresion, msg);
-        } else {
-            msg.reply("Escribe una película para sugerir :confused:");
-        }
-        break;
+      if(isValidArgument(args)) {
+        expresion = args.join(' ');
+        addMovie(expresion, msg);
+      } else {
+        msg.reply("Escribe una película para sugerir :confused:");
+      }
+      break;
     case '!lista':
-        movieList(msg);
-        break;
+      movieList(msg);
+      break;
     case '!eliminar':
-        if(isValidArgument(args)) {
-            expresion = args.join(' ');
-            deleteMovie(expresion, msg);
-        } else {
-            msg.reply("Escribe una película para eliminar :confused:");
-        }
-        break;
+      if(isValidArgument(args)) {
+        expresion = args.join(' ');
+        deleteMovie(expresion, msg);
+      } else {
+        msg.reply("Escribe una película para eliminar :confused:");
+      }
+      break;
     case '!elegir':
-            selectMovie(msg);
-        break;
+      selectMovie(msg);
+      break;
     /*** END RANDOMIZER***/
-
     case '!ayuda':
     case '!help':
       sendHelpCommands(msg);

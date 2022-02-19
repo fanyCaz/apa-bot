@@ -8,14 +8,16 @@ instance.defaults.timeout = 2500;
 
 import { validISBN, getBookInfo } from "./books";
 import { searchMovie, searchTrailer } from "./movies";
+import { addMovie, movieList, deleteMovie, selectMovie } from './randomizer';
 
 function sendHelpCommands(msg: any){
-  let commands = "ping -> pong! \n " +
+  let commands = "!ping -> pong! \n " +
     "!libro -> Dame un ISBN y traeré la referencia APA de ese libro (dependiendo de la información que encuentre) \n" +
     "!pelicula -> Buscaré información y trailer de la película que me digas, como '!pelicula godzilla' \n" +
     "!lista -> Mostraré todas las películas que tengas agregadas para ver después \n" +
     "!sugerir -> Agregaré la película que escribas a la lista, escríbela como '!sugerir Buscando a Nemo' \n" +
     "!elegir -> Seleccionaré una película al azar y te diré el nombre \n" +
+    "!eliminar -> Eliminaré la película de la lista \n" +
     "Toma en cuenta que estoy chiquito :pensive: y puedo cometer errores medio sonsos :pleading_face:";
   const embeded = new Discord.MessageEmbed()
     .setTitle("Comandos disponibles")
@@ -62,6 +64,7 @@ client.on('message', (msg: any) =>{
   /*LOS COMANDOS DEBEN EMPEZAR CON '!' PARA NO CONFUNDIR CON MSG NORMAL DEL CHAT, O HACER QUE SOLO RESPONDA EN UN CHANNEL ESPECÍFICO*/
   let args: string[] = message.trim().split(/ +/);
   let command = args.shift();
+  let expresion;
   
   switch(command){
     case '!ping':
@@ -98,18 +101,32 @@ client.on('message', (msg: any) =>{
         msg.reply("Pasa el nombre de una película :upside_down_face:");
       }
       break;
+
+    /*** RANDOMIZER ***/
     case '!sugerir':
-      msg.reply("Coming soon");
-      break;
+        if(isValidArgument(args)) {
+            expresion = args.join(' ');
+            addMovie(expresion, msg);
+        } else {
+            msg.reply("Escribe una película para sugerir :confused:");
+        }
+        break;
     case '!lista':
-      msg.reply("Coming soon");
-      break;
+        movieList(msg);
+        break;
     case '!eliminar':
-      msg.reply("Coming soon");
-    break;
+        if(isValidArgument(args)) {
+            expresion = args.join(' ');
+            deleteMovie(expresion, msg);
+        } else {
+            msg.reply("Escribe una película para eliminar :confused:");
+        }
+        break;
     case '!elegir':
-      msg.reply("Coming soon");
-      break;
+            selectMovie(msg);
+        break;
+    /*** END RANDOMIZER***/
+
     case '!ayuda':
     case '!help':
       sendHelpCommands(msg);
@@ -117,4 +134,4 @@ client.on('message', (msg: any) =>{
   }
 });
 
-client.login(process.env.TOKEN);
+client.login("ODc5MDU5MzMyMTkxMzg3NjU5.YSKNzA.F0qd9LAYc_Tf45uOHpnrMDwhs-c");

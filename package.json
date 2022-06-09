@@ -11,7 +11,8 @@
         "watch": "tsc -w",
         "dev": "nodemon dist/bot.js",
         "coding": "concurrently \"yarn dev\" \"yarn watch\" ",
-        "start": "node dist/bot.js"
+        "start": "node dist/bot.js",
+        "build": "tsc"
     },
     "repository": {
         "type": "git",

@@ -4,10 +4,13 @@
     "description": "Bot that gets the APA reference of any book ... as long as it is available in this page: https://openlibrary.org/developers/api. Now I want to include movies too... as long as they're available in this page: https://imdb-api.com/api",
     "main": "index.js",
     "engines": {
-      "node": "14.x",
+      "node": "16.x",
       "npm": "*"
     },
     "scripts": {
+        "watch": "tsc -w",
+        "dev": "nodemon dist/bot.js",
+        "coding": "concurrently \"yarn dev\" \"yarn watch\" ",
         "start": "node dist/bot.js"
     },
     "repository": {
@@ -27,7 +30,7 @@
         "typescript": "^4.2.4"
     },
     "dependencies": {
-        "axios": "^0.21.1",
+        "axios": "^0.21.2",
         "concurrently": "^6.2.0",
         "discord.js": "^12.5.3",
         "dotenv": "^8.2.0",

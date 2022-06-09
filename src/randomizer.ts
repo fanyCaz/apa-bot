@@ -36,7 +36,7 @@ function selectMovie(msg: any){
     msg.reply(`Aún no hay películas en la lista. Añade una con '!sugerir {pelicula}' :slight_smile:`);
     return;
   }
-  const movie=[...movieSet][Math.floor((Math.random()*movieSet.size)];
+  const movie=[...movieSet][Math.floor(Math.random()*movieSet.size)];
   msg.reply(`La película elegida es: ${movie} :movie_camera:`);
 }
 

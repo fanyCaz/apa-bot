@@ -132,4 +132,4 @@ client.on('message', (msg: any) =>{
   }
 });
 
-client.login(process.env.TOKEN_DEV);
+client.login(process.env.TOKEN);
